@@ -24,7 +24,7 @@ DEBUG = env("DEBUG")
 SECRET_KEY = env("SECRET_KEY")
 SESSION_COOKIE_SECURE = env("SESSION_COOKIE_SECURE")
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
 # Application definition
 
@@ -114,7 +114,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = "static/"
+#STATIC_URL = "static/"
+
+STATIC_URL = '/static/'
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#STATICFILES_DIRS = [
+#        'base/static',
+#       ]
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field

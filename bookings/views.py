@@ -50,23 +50,22 @@ class CreateBookingView(generics.CreateAPIView):
 
         if data["event_type"] == "form_response":
             for answer in data["form_response"]["answers"]:
-                match answer["field"]["id"]:
-                    case "LwvCDF97Z3oh":
-                        speaker.sex = answer["choice"]["label"]
-                    case "BFHvuavpm2QD":
-                        speaker.dob = answer["date"]
-                    case "R3boiK7GwVaq":
-                        speaker.accent = answer["choice"]["label"]
-                    case "ntwEuuLyrVpH":
-                        invitee = calendly(answer["url"])
-                        speaker.forename = invitee["resource"]["first_name"]
-                        speaker.name = invitee["resource"]["last_name"]
+                if answer["field"]["id"] == "LwvCDF97Z3oh":
+                    speaker.sex = answer["choice"]["label"]
+                elif answer["field"]["id"] == "BFHvuavpm2QD":
+                    speaker.dob = answer["date"]
+                elif answer["field"]["id"] == "R3boiK7GwVaq":
+                    speaker.accent = answer["choice"]["label"]
+                elif answer["field"]["id"] == "ntwEuuLyrVpH":
+                    invitee = calendly(answer["url"])
+                    speaker.forename = invitee["resource"]["first_name"]
+                    speaker.name = invitee["resource"]["last_name"]
 
-                        event = calendly(invitee["resource"]["event"])
-                        project.session = DateTimeTZRange(
-                            event["resource"]["start_time"],
-                            event["resource"]["end_time"],
-                        )
+                    event = calendly(invitee["resource"]["event"])
+                    project.session = DateTimeTZRange(
+                        event["resource"]["start_time"],
+                        event["resource"]["end_time"],
+                    )
             project.save()
             speaker.save()
         return
