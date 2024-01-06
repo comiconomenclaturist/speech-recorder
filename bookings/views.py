@@ -1,7 +1,9 @@
 from rest_framework import generics
 from rest_framework import permissions
+from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from psycopg2.extras import DateTimeTZRange
+from urllib.parse import urlparse
 from speech_recording import settings
 from speech_recorder.models import Project, Speaker
 import hashlib
@@ -31,8 +33,16 @@ class CreateBookingPermission(permissions.BasePermission):
 
 
 def calendly(url):
+    url = urlparse(url)
+    url = f"https://api.calendly.com/{url.path}"
+
     r = requests.get(
-        url, headers={"Authorization": f"Bearer {settings.env('CALENDLY_TOKEN')}"}
+        url,
+        headers={
+            "Authorization": f"Bearer {settings.env('CALENDLY_TOKEN')}",
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        },
     )
     if r.status_code == 200:
         return json.loads(r.text)
@@ -51,7 +61,7 @@ class CreateBookingView(generics.CreateAPIView):
         if data["event_type"] == "form_response":
             for answer in data["form_response"]["answers"]:
                 if answer["field"]["id"] == "LwvCDF97Z3oh":
-                    speaker.sex = answer["choice"]["label"]
+                    speaker.sex = answer["choice"]["label"][0]
                 elif answer["field"]["id"] == "BFHvuavpm2QD":
                     speaker.dob = answer["date"]
                 elif answer["field"]["id"] == "R3boiK7GwVaq":
@@ -66,6 +76,6 @@ class CreateBookingView(generics.CreateAPIView):
                         event["resource"]["start_time"],
                         event["resource"]["end_time"],
                     )
-            project.save()
+            # project.save()
             speaker.save()
-        return
+        return Response({}, status=200)

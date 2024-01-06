@@ -49,6 +49,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "rollbar.contrib.django.middleware.RollbarNotifierMiddleware",
 ]
 
 ROOT_URLCONF = "speech_recording.urls"
@@ -114,14 +115,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-#STATIC_URL = "static/"
+# STATIC_URL = "static/"
 
-STATIC_URL = '/static/'
+STATIC_URL = "/static/"
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-#STATICFILES_DIRS = [
+# STATICFILES_DIRS = [
 #        'base/static',
 #       ]
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -132,4 +133,11 @@ REST_FRAMEWORK = {
     "DEFAULT_PARSER_CLASSES": ("rest_framework.parsers.JSONParser",),
     # "DEFAULT_RENDERER_CLASSES": ("rest_framework_xml.renderers.XMLRenderer",),
     "DEFAULT_RENDERER_CLASSES": ("speech_recording.xml_renderer.CustomXMLRenderer",),
+}
+
+ROLLBAR = {
+    "access_token": env("ROLLBAR_ACCESS_TOKEN"),
+    "environment": "development" if DEBUG else "production",
+    "code_version": "1.0",
+    "root": BASE_DIR,
 }
