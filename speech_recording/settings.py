@@ -115,13 +115,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-# STATIC_URL = "static/"
-
 STATIC_URL = "/static/"
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# STATICFILES_DIRS = [
-#        'base/static',
-#       ]
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 # Default primary key field type
@@ -131,7 +126,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     "DEFAULT_PARSER_CLASSES": ("rest_framework.parsers.JSONParser",),
-    # "DEFAULT_RENDERER_CLASSES": ("rest_framework_xml.renderers.XMLRenderer",),
     "DEFAULT_RENDERER_CLASSES": ("speech_recording.xml_renderer.CustomXMLRenderer",),
 }
 
