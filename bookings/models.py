@@ -15,3 +15,6 @@ class Booking(models.Model):
                 expressions=[("session", RangeOperators.OVERLAPS)],
             ),
         ]
+
+    def __str__(self):
+        return f"{self.session.lower.strftime('%Y/%m/%d %H:%M')} - {self.speaker}"
