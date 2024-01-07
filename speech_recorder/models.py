@@ -8,9 +8,11 @@ class Speaker(models.Model):
         ("F", "FEMALE"),
         ("O", "OTHER"),
     )
-    dob = models.DateField(verbose_name="Date of birth")
+    personId = models.BigAutoField(primary_key=True)
+    dateOfBirth = models.DateField(verbose_name="Date of birth")
     forename = models.CharField(max_length=64)
     name = models.CharField(max_length=64)
+    email = models.EmailField()
     registered = models.DateTimeField(auto_now_add=True)
     sex = models.CharField(choices=SEX_CHOICES, max_length=1)
     uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)

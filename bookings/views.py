@@ -5,7 +5,8 @@ from django.views.decorators.csrf import csrf_exempt
 from psycopg2.extras import DateTimeTZRange
 from urllib.parse import urlparse
 from speech_recording import settings
-from speech_recorder.models import Project, Speaker
+from speech_recorder.models import Speaker
+from bookings.models import Booking
 import hashlib
 import hmac
 import base64
@@ -55,7 +56,7 @@ class CreateBookingView(generics.CreateAPIView):
     @csrf_exempt
     def post(self, request, *args, **kwargs):
         data = request.data
-        project = Project()
+        booking = Booking()
         speaker = Speaker()
 
         if data["event_type"] == "form_response":
@@ -70,12 +71,16 @@ class CreateBookingView(generics.CreateAPIView):
                     invitee = calendly(answer["url"])
                     speaker.forename = invitee["resource"]["first_name"]
                     speaker.name = invitee["resource"]["last_name"]
+                    speaker.email = invitee["resource"]["email"]
 
                     event = calendly(invitee["resource"]["event"])
-                    project.session = DateTimeTZRange(
+                    booking.session = DateTimeTZRange(
                         event["resource"]["start_time"],
                         event["resource"]["end_time"],
                     )
-            # project.save()
+
             speaker.save()
+            booking.speaker = speaker
+            booking.save()
+
         return Response({}, status=200)
