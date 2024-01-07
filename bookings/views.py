@@ -64,7 +64,7 @@ class CreateBookingView(generics.CreateAPIView):
                 if answer["field"]["id"] == "LwvCDF97Z3oh":
                     speaker.sex = answer["choice"]["label"][0]
                 elif answer["field"]["id"] == "BFHvuavpm2QD":
-                    speaker.dob = answer["date"]
+                    speaker.dateOfBirth = answer["date"]
                 elif answer["field"]["id"] == "R3boiK7GwVaq":
                     speaker.accent = answer["choice"]["label"]
                 elif answer["field"]["id"] == "ntwEuuLyrVpH":
