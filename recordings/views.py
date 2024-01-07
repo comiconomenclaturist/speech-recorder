@@ -1,3 +1,4 @@
+from rest_framework.viewsets import ModelViewSet
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework.response import Response
@@ -5,13 +6,26 @@ from django.views.decorators.csrf import csrf_exempt
 from psycopg2.extras import DateTimeTZRange
 from urllib.parse import urlparse
 from speech_recording import settings
-from speech_recorder.models import Speaker
-from bookings.models import Booking
+
+# from speech_recording.xml_renderer import CustomXMLRenderer
+from .models import Booking, Speaker
+from .serializers import SpeakerSerializer
 import hashlib
 import hmac
 import base64
 import json
 import requests
+
+
+# class SpeakerXMLRenderer(CustomXMLRenderer):
+#     root_tag_name = "speakers"
+#     item_tag_name = "speakers"
+
+
+class SpeakersViewset(ModelViewSet):
+    queryset = Speaker.objects.all()
+    serializer_class = SpeakerSerializer
+    # renderer_classes = [SpeakerXMLRenderer]
 
 
 class CreateBookingPermission(permissions.BasePermission):

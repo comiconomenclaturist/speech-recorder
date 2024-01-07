@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.postgres.fields import DateTimeRangeField, RangeOperators
+from django.contrib.postgres.constraints import ExclusionConstraint
 import uuid
 
 
@@ -49,3 +51,19 @@ class Project(models.Model):
     playback_mixer_name = models.CharField(max_length=64)
     recording_config = models.ForeignKey(RecordingConfig, on_delete=models.PROTECT)
     prompt_config = models.ForeignKey(PromptConfig, on_delete=models.PROTECT)
+
+
+class Booking(models.Model):
+    session = DateTimeRangeField()
+    speaker = models.ForeignKey(Speaker, on_delete=models.PROTECT)
+
+    class Meta:
+        constraints = [
+            ExclusionConstraint(
+                name="exclude_overlapping_sessions",
+                expressions=[("session", RangeOperators.OVERLAPS)],
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.session.lower.strftime('%Y/%m/%d %H:%M')} - {self.speaker}"
