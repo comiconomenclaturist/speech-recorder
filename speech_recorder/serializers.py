@@ -14,3 +14,4 @@ class SpeakerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Speaker
+        exclude = ("email",)
