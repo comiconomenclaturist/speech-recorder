@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Speaker
+from .models import *
 
 
 class SpeakerSerializer(serializers.ModelSerializer):
@@ -15,3 +15,18 @@ class SpeakerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Speaker
         exclude = ("email",)
+
+
+class RecordingSerializer(serializers.Serializer):
+    mediaitem = serializers.CharField()
+
+    class Meta:
+        model = Recording
+
+
+class ScriptSerializer(serializers.ModelSerializer):
+    recording = serializers.StringRelatedField(many=True, read_only=True)
+
+    class Meta:
+        model = Script
+        exclude = ("speaker",)

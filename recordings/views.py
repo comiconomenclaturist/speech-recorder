@@ -1,50 +1,31 @@
-from rest_framework.viewsets import ModelViewSet
-from rest_framework import generics
-from rest_framework import permissions
+from rest_framework import viewsets, mixins, generics
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.timezone import now
 from psycopg2.extras import DateTimeTZRange
 from urllib.parse import urlparse
 from speech_recording import settings
-
-# from speech_recording.xml_renderer import CustomXMLRenderer
-from .models import Booking, Speaker
-from .serializers import SpeakerSerializer
-import hashlib
-import hmac
-import base64
+from .models import *
+from .serializers import *
+from .permissions import CreateBookingPermission
+from .renderers import SpeakerXMLRenderer, ScriptXMLRenderer
 import json
 import requests
 
 
-# class SpeakerXMLRenderer(CustomXMLRenderer):
-#     root_tag_name = "speakers"
-#     item_tag_name = "speakers"
-
-
-class SpeakersViewset(ModelViewSet):
-    queryset = Speaker.objects.all()
+class SpeakersViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    queryset = Speaker.objects.filter(bookings__session__startswith__gte=now())
     serializer_class = SpeakerSerializer
-    # renderer_classes = [SpeakerXMLRenderer]
+    renderer_classes = (SpeakerXMLRenderer,)
 
 
-class CreateBookingPermission(permissions.BasePermission):
-    def has_permission(self, request, view):
-        signature = request.headers.get("typeform-signature")
-
-        if not signature:
-            return False
-
-        sha_name, signature = signature.split("=", 1)
-
-        if sha_name != "sha256":
-            return False
-
-        SECRET = settings.env("TYPEFORM_SECRET_KEY")
-        digest = hmac.new(SECRET.encode("utf-8"), request.body, hashlib.sha256).digest()
-        e = base64.b64encode(digest).decode()
-
-        return e == signature
+class ScriptsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    permission_classes = (IsAuthenticated,)
+    queryset = Script.objects.all()
+    serializer_class = ScriptSerializer
+    renderer_classes = (ScriptXMLRenderer,)
 
 
 def calendly(url):

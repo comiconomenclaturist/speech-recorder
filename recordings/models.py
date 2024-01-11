@@ -25,6 +25,29 @@ class Speaker(models.Model):
         return f"{self.forename} {self.name}"
 
 
+class Script(models.Model):
+    speaker = models.ForeignKey(
+        Speaker, null=True, blank=True, on_delete=models.PROTECT
+    )
+
+    def __str__(self):
+        return f"script_{self.pk}"
+
+
+class Recording(models.Model):
+    script = models.ForeignKey(
+        Script,
+        null=True,
+        blank=True,
+        related_name="recording",
+        on_delete=models.PROTECT,
+    )
+    mediaitem = models.TextField()
+
+    def __str__(self):
+        return self.mediaitem
+
+
 class Format(models.Model):
     channels = models.PositiveSmallIntegerField()
     frame_size = models.PositiveSmallIntegerField()
@@ -55,7 +78,9 @@ class Project(models.Model):
 
 class Booking(models.Model):
     session = DateTimeRangeField()
-    speaker = models.ForeignKey(Speaker, on_delete=models.PROTECT)
+    speaker = models.ForeignKey(
+        Speaker, related_name="bookings", on_delete=models.PROTECT
+    )
 
     class Meta:
         constraints = [

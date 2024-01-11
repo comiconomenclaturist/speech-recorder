@@ -1,7 +1,14 @@
 from django.contrib import admin
-from .models import Booking, Speaker
+from .models import *
 
-admin.site.register(Speaker)
+
+class RecordingInline(admin.TabularInline):
+    model = Recording
+
+
+@admin.register(Script)
+class ScriptAdmin(admin.ModelAdmin):
+    inlines = (RecordingInline,)
 
 
 @admin.register(Booking)
@@ -17,3 +24,7 @@ class BookingAdmin(admin.ModelAdmin):
             return obj.session.upper
 
     list_display = ("start", "end", "speaker")
+
+
+admin.site.register(Speaker)
+admin.site.register(Recording)
