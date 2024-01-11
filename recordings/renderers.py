@@ -38,7 +38,7 @@ class ScriptXMLRenderer(XMLRenderer):
             for index, item in enumerate(data):
                 xml.startElement(
                     "recording",
-                    {"finalsilence": "4000", "itemcode": str(index - 1).zfill(4)},
+                    {"finalsilence": "4000", "itemcode": str((index)).zfill(4)},
                 )
                 xml.startElement("recprompt", {})
                 xml.startElement(self.item_tag_name, {"languageISO639code": "en"})
