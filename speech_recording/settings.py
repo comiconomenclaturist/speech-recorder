@@ -128,9 +128,10 @@ REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ("speech_recording.xml_renderer.CustomXMLRenderer",),
 }
 
-ROLLBAR = {
-    "access_token": env("ROLLBAR_ACCESS_TOKEN"),
-    "environment": "development" if DEBUG else "production",
-    "code_version": "1.0",
-    "root": BASE_DIR,
-}
+if not DEBUG:
+    ROLLBAR = {
+        "access_token": env("ROLLBAR_ACCESS_TOKEN"),
+        "environment": "production",
+        "code_version": "1.0",
+        "root": BASE_DIR,
+    }
