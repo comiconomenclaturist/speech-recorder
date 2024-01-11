@@ -10,6 +10,8 @@ class RecordingInline(admin.TabularInline):
 class ScriptAdmin(admin.ModelAdmin):
     inlines = (RecordingInline,)
 
+    list_display = ("__str__", "speaker")
+
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):

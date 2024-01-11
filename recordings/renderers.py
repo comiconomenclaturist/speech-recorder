@@ -47,7 +47,7 @@ class ScriptXMLRenderer(XMLRenderer):
             xml.startElement(
                 "section",
                 {
-                    "name": f"script_{data.get('id', 0)}",
+                    "name": f"script_{pk}",
                     "promptphase": "recording",
                     "speakerdisplay": "true",
                 },
