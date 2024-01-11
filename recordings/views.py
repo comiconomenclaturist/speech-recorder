@@ -8,15 +8,21 @@ from urllib.parse import urlparse
 from speech_recording import settings
 from .models import *
 from .serializers import *
-from .permissions import CreateBookingPermission
+from .permissions import CreateProjectPermission
 from .renderers import SpeakerXMLRenderer, ScriptXMLRenderer
 import json
 import requests
 
 
+class ProjectsViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+
+
 class SpeakersViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
-    queryset = Speaker.objects.filter(bookings__session__startswith__gte=now())
+    queryset = Speaker.objects.filter(projects__session__startswith__gte=now())
     serializer_class = SpeakerSerializer
     renderer_classes = (SpeakerXMLRenderer,)
 
@@ -45,13 +51,13 @@ def calendly(url):
     raise Exception(r)
 
 
-class CreateBookingView(generics.CreateAPIView):
-    permission_classes = [CreateBookingPermission]
+class CreateProjectView(generics.CreateAPIView):
+    permission_classes = [CreateProjectPermission]
 
     @csrf_exempt
     def post(self, request, *args, **kwargs):
         data = request.data
-        booking = Booking()
+        project = Project()
         speaker = Speaker()
 
         if data["event_type"] == "form_response":
@@ -69,13 +75,13 @@ class CreateBookingView(generics.CreateAPIView):
                     speaker.email = invitee["resource"]["email"]
 
                     event = calendly(invitee["resource"]["event"])
-                    booking.session = DateTimeTZRange(
+                    project.session = DateTimeTZRange(
                         event["resource"]["start_time"],
                         event["resource"]["end_time"],
                     )
 
             speaker.save()
-            booking.speaker = speaker
-            booking.save()
+            project.speaker = speaker
+            project.save()
 
         return Response({}, status=200)

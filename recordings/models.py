@@ -69,18 +69,14 @@ class PromptConfig(models.Model):
 
 
 class Project(models.Model):
-    name = models.CharField(max_length=64)
-    recording_mixer_name = models.CharField(max_length=64)
-    playback_mixer_name = models.CharField(max_length=64)
-    recording_config = models.ForeignKey(RecordingConfig, on_delete=models.PROTECT)
-    prompt_config = models.ForeignKey(PromptConfig, on_delete=models.PROTECT)
-
-
-class Booking(models.Model):
     session = DateTimeRangeField()
     speaker = models.ForeignKey(
-        Speaker, related_name="bookings", on_delete=models.PROTECT
+        Speaker, related_name="projects", on_delete=models.PROTECT
     )
+    recordingMixerName = models.CharField(max_length=64)
+    playbackMixerName = models.CharField(max_length=64)
+    recording_config = models.ForeignKey(RecordingConfig, on_delete=models.PROTECT)
+    prompt_config = models.ForeignKey(PromptConfig, on_delete=models.PROTECT)
 
     class Meta:
         constraints = [

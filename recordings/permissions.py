@@ -5,7 +5,7 @@ import hmac
 import base64
 
 
-class CreateBookingPermission(BasePermission):
+class CreateProjectPermission(BasePermission):
     def has_permission(self, request, view):
         signature = request.headers.get("typeform-signature")
 

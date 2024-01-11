@@ -13,9 +13,9 @@ class ScriptAdmin(admin.ModelAdmin):
     list_display = ("__str__", "speaker")
 
 
-@admin.register(Booking)
-class BookingAdmin(admin.ModelAdmin):
-    model = Booking
+@admin.register(Project)
+class ProjectAdmin(admin.ModelAdmin):
+    model = Project
 
     def start(self, obj):
         if obj:
