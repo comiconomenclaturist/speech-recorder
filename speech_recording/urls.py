@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 from django.urls import path
-from rest_framework.routers import DefaultRouter
+from rest_framework.routers import SimpleRouter
 from recordings.views import CreateBookingView, SpeakersViewSet, ScriptsViewSet
 
 admin.site.site_header = "Speech Recorder admin"
@@ -15,7 +15,7 @@ urlpatterns = [
     path("api/bookings/add/", CreateBookingView.as_view()),
 ]
 
-router = DefaultRouter()
-router.register(r"api/speakers", SpeakersViewSet, basename="speakers")
-router.register(r"api/scripts", ScriptsViewSet, basename="scripts")
+router = SimpleRouter()
+router.register("api/speakers", SpeakersViewSet, basename="speakers")
+router.register("api/scripts", ScriptsViewSet, basename="scripts")
 urlpatterns += router.urls
