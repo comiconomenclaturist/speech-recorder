@@ -12,7 +12,7 @@ admin.site.index_title = "Welcome to the Speech Recorder admin"
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/projects/add/", CreateProjectView.as_view()),
+    path("api/bookings/add/", CreateProjectView.as_view()),
 ]
 
 router = SimpleRouter()
