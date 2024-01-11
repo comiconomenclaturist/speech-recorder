@@ -35,13 +35,20 @@ class ScriptXMLRenderer(XMLRenderer):
 
     def _to_xml(self, xml, data):
         if isinstance(data, (list, tuple)):
-            for item in data:
+            for index, item in enumerate(data):
+                xml.startElement(
+                    "recording",
+                    {"finalsilence": "4000", "itemcode": str(index - 1).zfill(4)},
+                )
+                xml.startElement("recprompt", {})
                 xml.startElement(self.item_tag_name, {"languageISO639code": "en"})
                 self._to_xml(xml, item)
                 xml.endElement(self.item_tag_name)
+                xml.endElement("recprompt")
+                xml.endElement("recording")
 
         elif isinstance(data, dict):
-            pk = data.get("id", 0)
+            pk = data.pop("id", 0)
             xml.startElement(self.root_tag_name, {"id": f"script_{pk}"})
             xml.startElement("recordingscript", {})
             xml.startElement(
@@ -52,15 +59,9 @@ class ScriptXMLRenderer(XMLRenderer):
                     "speakerdisplay": "true",
                 },
             )
-            for index, (key, value) in enumerate(data.items()):
-                if key != "id":
-                    xml.startElement(
-                        key, {"finalsilence": "4000", "itemcode": str(index).zfill(4)}
-                    )
-                    xml.startElement("recprompt", {})
-                    self._to_xml(xml, value)
-                    xml.endElement("recprompt")
-                    xml.endElement(key)
+            for key, value in data.items():
+                self._to_xml(xml, value)
+
             xml.endElement("section")
             xml.endElement("recordingscript")
             xml.endElement(self.root_tag_name)
