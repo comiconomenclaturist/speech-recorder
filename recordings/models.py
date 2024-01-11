@@ -75,8 +75,8 @@ class Project(models.Model):
     )
     recordingMixerName = models.CharField(max_length=64)
     playbackMixerName = models.CharField(max_length=64)
-    recording_config = models.ForeignKey(RecordingConfig, on_delete=models.PROTECT)
-    prompt_config = models.ForeignKey(PromptConfig, on_delete=models.PROTECT)
+    # recording_config = models.ForeignKey(RecordingConfig, on_delete=models.PROTECT)
+    # prompt_config = models.ForeignKey(PromptConfig, on_delete=models.PROTECT)
 
     class Meta:
         constraints = [
