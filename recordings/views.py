@@ -1,5 +1,4 @@
 from rest_framework import viewsets, mixins, generics
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
@@ -15,20 +14,17 @@ import requests
 
 
 class ProjectsViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
 
 
 class SpeakersViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
     queryset = Speaker.objects.filter(projects__session__startswith__gte=now())
     serializer_class = SpeakerSerializer
     renderer_classes = (SpeakerXMLRenderer,)
 
 
 class ScriptsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
-    permission_classes = (IsAuthenticated,)
     queryset = Script.objects.all()
     serializer_class = ScriptSerializer
     renderer_classes = (ScriptXMLRenderer,)
