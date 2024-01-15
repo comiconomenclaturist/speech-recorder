@@ -3,9 +3,36 @@ from .models import *
 
 
 class ProjectSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source="__str__")
+    recordingMixerName = serializers.CharField(read_only=True)
+    playbackMixerName = serializers.CharField(read_only=True)
+    RecordingConfiguration = serializers.SerializerMethodField()
+    PromptConfiguration = serializers.SerializerMethodField()
+    Speakers = serializers.SerializerMethodField()
+
+    def get_RecordingConfiguration(self, instance):
+        return {
+            "url": "RECS/",
+            "Format": {"channels": "1", "frameSize": "2"},
+            "captureScope": "SESSION",
+        }
+
+    def get_PromptConfiguration(self, instance):
+        return {
+            "promptsUrl": f"{instance.script}.xml",
+            "InstructionsFont": {"family": "SansSerif"},
+            "PromptFont": {"family": "SansSerif"},
+            "DescriptionFont": {"family": "SansSerif"},
+            "automaticPromptPlay": "false",
+            "PromptBeep": {"beepGainRatio": "1.0"},
+        }
+
+    def get_Speakers(self, instance):
+        return {"speakersUrl": f"speaker_{instance.speaker.pk}.xml"}
+
     class Meta:
         model = Project
-        fields = "__all__"
+        exclude = ("id", "session", "script", "speaker")
 
 
 class SpeakerSerializer(serializers.ModelSerializer):
@@ -21,13 +48,6 @@ class SpeakerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Speaker
         exclude = ("email",)
-
-
-class RecordingSerializer(serializers.Serializer):
-    mediaitem = serializers.CharField()
-
-    class Meta:
-        model = Recording
 
 
 class ScriptSerializer(serializers.ModelSerializer):

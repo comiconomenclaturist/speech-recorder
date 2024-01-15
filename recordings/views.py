@@ -1,6 +1,7 @@
 from rest_framework import viewsets, mixins, generics
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
+from django.http import Http404
 from django.utils.timezone import now
 from psycopg2.extras import DateTimeTZRange
 from urllib.parse import urlparse
@@ -8,18 +9,37 @@ from speech_recording import settings
 from .models import *
 from .serializers import *
 from .permissions import CreateProjectPermission
-from .renderers import SpeakerXMLRenderer, ScriptXMLRenderer
+from .renderers import *
 import json
 import requests
 
 
-class ProjectsViewSet(viewsets.ModelViewSet):
+class ProjectsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
+    renderer_classes = (ProjectXMLRenderer,)
+
+    def get_object(self):
+        queryset = self.filter_queryset(self.get_queryset())
+        pk = self.kwargs.get("pk")
+
+        if pk == "next":
+            obj = queryset.filter(session__startswith__gte=now()).first()
+        else:
+            try:
+                obj = queryset.get(pk=pk)
+            except:
+                raise Http404
+
+        if obj:
+            self.check_object_permissions(self.request, obj)
+            return obj
+
+        raise Http404
 
 
-class SpeakersViewSet(viewsets.ModelViewSet):
-    queryset = Speaker.objects.filter(projects__session__startswith__gte=now())
+class SpeakersViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    queryset = Speaker.objects.all()
     serializer_class = SpeakerSerializer
     renderer_classes = (SpeakerXMLRenderer,)
 

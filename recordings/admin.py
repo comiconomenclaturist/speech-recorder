@@ -9,7 +9,6 @@ class RecordingInline(admin.TabularInline):
 @admin.register(Script)
 class ScriptAdmin(admin.ModelAdmin):
     inlines = (RecordingInline,)
-
     list_display = ("__str__", "speaker")
 
 
@@ -28,5 +27,25 @@ class ProjectAdmin(admin.ModelAdmin):
     list_display = ("start", "end", "speaker")
 
 
-admin.site.register(Speaker)
+@admin.register(Speaker)
+class SpeakerAdmin(admin.ModelAdmin):
+    model = Speaker
+    list_display = ("__str__", "email")
+
+
+class MixerNameAdmin(admin.ModelAdmin):
+    list_display = ("name", "default")
+    list_editable = ("default",)
+
+
+@admin.register(RecordingMixerName)
+class RecordingMixerNameAdmin(MixerNameAdmin):
+    pass
+
+
+@admin.register(PlaybackMixerName)
+class PlaybackMixerNameAdmin(MixerNameAdmin):
+    pass
+
+
 admin.site.register(Recording)

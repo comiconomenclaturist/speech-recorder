@@ -54,18 +54,38 @@ class Format(models.Model):
 
 
 class RecordingConfig(models.Model):
-    url = models.CharField(max_length=64)
-    fmt = models.ForeignKey(Format, on_delete=models.PROTECT)
+    url = models.FilePathField(max_length=64, default="RECS/")
+    fmt = models.ForeignKey(Format, on_delete=models.PROTECT, verbose_name="Format")
+
+    def captureScope(self):
+        return "SESSION"
 
 
-class InstructionsFont(models.Model):
-    def family(self):
-        return "SansSerif"
+class MixerName(models.Model):
+    name = models.CharField(max_length=64)
+    providerId = models.CharField(max_length=128)
+    default = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+        constraints = [
+            models.UniqueConstraint(
+                fields=["default"],
+                condition=models.Q(default=True),
+                name="%(class)s_unique_default",
+            )
+        ]
+
+    def __str__(self):
+        return self.name
 
 
-class PromptConfig(models.Model):
-    prompts_url = models.CharField(max_length=64)
-    instructions_font = models.ForeignKey(InstructionsFont, on_delete=models.PROTECT)
+class RecordingMixerName(MixerName):
+    pass
+
+
+class PlaybackMixerName(MixerName):
+    pass
 
 
 class Project(models.Model):
@@ -73,10 +93,13 @@ class Project(models.Model):
     speaker = models.ForeignKey(
         Speaker, related_name="projects", on_delete=models.PROTECT
     )
-    recordingMixerName = models.CharField(max_length=64)
-    playbackMixerName = models.CharField(max_length=64)
-    # recording_config = models.ForeignKey(RecordingConfig, on_delete=models.PROTECT)
-    # prompt_config = models.ForeignKey(PromptConfig, on_delete=models.PROTECT)
+    script = models.ForeignKey(Script, on_delete=models.PROTECT)
+    recordingMixerName = models.ForeignKey(
+        RecordingMixerName, null=True, on_delete=models.PROTECT
+    )
+    playbackMixerName = models.ForeignKey(
+        PlaybackMixerName, null=True, on_delete=models.PROTECT
+    )
 
     class Meta:
         constraints = [
@@ -87,4 +110,4 @@ class Project(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.session.lower.strftime('%Y/%m/%d %H:%M')} - {self.speaker}"
+        return f"{self.session.lower.strftime('%Y-%m-%d %H:%M')} - {self.speaker}"
