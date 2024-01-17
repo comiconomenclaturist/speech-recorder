@@ -42,7 +42,7 @@ class Recording(models.Model):
         related_name="recording",
         on_delete=models.PROTECT,
     )
-    mediaitem = models.TextField()
+    mediaitem = models.CharField(unique=True, max_length=255)
 
     def __str__(self):
         return self.mediaitem
