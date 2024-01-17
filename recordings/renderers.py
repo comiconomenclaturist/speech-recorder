@@ -3,11 +3,38 @@ from xml.sax.saxutils import XMLGenerator
 from django.utils.encoding import force_str
 from speech_recording.xml_renderer import CustomXMLRenderer
 from io import StringIO
+from .models import RecordingMixerName, PlaybackMixerName
 
 
 class ProjectXMLRenderer(CustomXMLRenderer):
     xml_attrs = {"standalone": "no"}
     root_tag = ("ProjectConfiguration", {"version": "4.0.0"})
+
+    def _to_xml(self, xml, data):
+        if isinstance(data, (list, tuple)):
+            for item in data:
+                xml.startElement(self.item_tag_name, {})
+                self._to_xml(xml, item)
+                xml.endElement(self.item_tag_name)
+
+        elif isinstance(data, dict):
+            for key, value in data.items():
+                if isinstance(value, (RecordingMixerName, PlaybackMixerName)):
+                    # Add providerId attribute to soundcard fields
+                    xml.startElement(key, {"providerId": value.providerId})
+                    self._to_xml(xml, value)
+                    xml.endElement(key)
+                else:
+                    xml.startElement(key, {})
+                    self._to_xml(xml, value)
+                    xml.endElement(key)
+
+        elif data is None:
+            # Don't output any value
+            pass
+
+        else:
+            xml.characters(force_str(data))
 
 
 class SpeakerXMLRenderer(CustomXMLRenderer):

@@ -4,11 +4,17 @@ from .models import *
 
 class ProjectSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source="__str__")
-    recordingMixerName = serializers.CharField(read_only=True)
-    playbackMixerName = serializers.CharField(read_only=True)
+    recordingMixerName = serializers.SerializerMethodField()
+    playbackMixerName = serializers.SerializerMethodField()
     RecordingConfiguration = serializers.SerializerMethodField()
     PromptConfiguration = serializers.SerializerMethodField()
     Speakers = serializers.SerializerMethodField()
+
+    def get_recordingMixerName(self, instance):
+        return instance.recordingMixerName
+
+    def get_playbackMixerName(self, instance):
+        return instance.playbackMixerName
 
     def get_RecordingConfiguration(self, instance):
         return {
