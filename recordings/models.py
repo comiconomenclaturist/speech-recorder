@@ -11,7 +11,7 @@ class Speaker(models.Model):
         ("O", "OTHER"),
     )
     personId = models.BigAutoField(primary_key=True)
-    dateOfBirth = models.DateField(verbose_name="Date of birth")
+    dateOfBirth = models.DateField(verbose_name="Date of birth", null=True, blank=True)
     forename = models.CharField(max_length=64)
     name = models.CharField(max_length=64)
     email = models.EmailField()
