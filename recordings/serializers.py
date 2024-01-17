@@ -19,7 +19,12 @@ class ProjectSerializer(serializers.ModelSerializer):
     def get_RecordingConfiguration(self, instance):
         return {
             "url": "RECS/",
-            "Format": {"channels": "1", "frameSize": "2"},
+            "Format": {
+                "channels": "1",
+                "frameSize": "2",
+                "sampleRate": "48000.0",
+                "sampleSizeInBits": "24",
+            },
             "captureScope": "SESSION",
         }
 
