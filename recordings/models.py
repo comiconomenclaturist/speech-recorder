@@ -30,6 +30,9 @@ class Script(models.Model):
         Speaker, null=True, blank=True, on_delete=models.PROTECT
     )
 
+    class Meta:
+        ordering = ("id",)
+
     def __str__(self):
         return f"script_{self.pk}"
 
