@@ -93,7 +93,7 @@ class Project(models.Model):
     speaker = models.ForeignKey(
         Speaker, related_name="projects", on_delete=models.PROTECT
     )
-    script = models.ForeignKey(Script, on_delete=models.PROTECT)
+    script = models.ForeignKey(Script, null=True, on_delete=models.PROTECT)
     recordingMixerName = models.ForeignKey(
         RecordingMixerName, null=True, on_delete=models.PROTECT
     )

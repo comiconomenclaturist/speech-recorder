@@ -97,8 +97,7 @@ class CreateProjectView(generics.CreateAPIView):
                     )
 
             speaker.save()
-            script = Script.objects.create()
-            project.script = script
+            project.script = Script.object.filter(project__isnull=True).first()
             project.speaker = speaker
             project.save()
 
