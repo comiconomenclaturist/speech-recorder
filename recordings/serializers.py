@@ -47,7 +47,7 @@ class SpeakerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Speaker
-        exclude = ("email",)
+        exclude = ("email", "dateOfBirth")
 
 
 class ScriptSerializer(serializers.ModelSerializer):
