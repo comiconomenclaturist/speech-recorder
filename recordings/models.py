@@ -11,7 +11,7 @@ class Speaker(models.Model):
         ("O", "OTHER"),
     )
     personId = models.BigAutoField(primary_key=True)
-    dateOfBirth = models.DateField(verbose_name="Date of birth", null=True, blank=True)
+    dateOfBirth = models.DateField(verbose_name="Date of birth")
     forename = models.CharField(max_length=64)
     name = models.CharField(max_length=64)
     email = models.EmailField()
@@ -52,8 +52,14 @@ class Recording(models.Model):
 
 
 class Format(models.Model):
-    channels = models.PositiveSmallIntegerField()
-    frame_size = models.PositiveSmallIntegerField()
+    channels = models.PositiveSmallIntegerField(default=1)
+    frameSize = models.PositiveSmallIntegerField(default=3)
+    sampleRate = models.PositiveIntegerField(default=48000)
+    bigEndian = models.BooleanField(default=True)
+    sampleSizeInBits = models.PositiveSmallIntegerField(default=24)
+
+    def __str__(self):
+        return f"{self.sampleRate} Hz / {self.sampleSizeInBits} bit"
 
 
 class RecordingConfig(models.Model):

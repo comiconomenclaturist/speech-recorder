@@ -2,6 +2,11 @@ from rest_framework import serializers
 from .models import *
 
 
+class FormatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Format
+
+
 class ProjectSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source="__str__")
     recordingMixerName = serializers.SerializerMethodField()
