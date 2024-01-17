@@ -97,6 +97,10 @@ class CreateProjectView(generics.CreateAPIView):
             speaker.save()
             project.script = Script.objects.filter(project__isnull=True).first()
             project.speaker = speaker
+
+            project.recordingMixerName = RecordingMixerName.objects.filter(
+                default=True
+            ).first()
             project.save()
 
         return Response({}, status=200)
