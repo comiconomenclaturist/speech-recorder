@@ -21,7 +21,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "url": "RECS/",
             "Format": {
                 "channels": "1",
-                "frameSize": "2",
+                "frameSize": "3",
                 "sampleRate": "48000.0",
                 "bigEndian": "true",
                 "sampleSizeInBits": "24",
