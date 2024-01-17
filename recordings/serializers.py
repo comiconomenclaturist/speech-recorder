@@ -23,6 +23,7 @@ class ProjectSerializer(serializers.ModelSerializer):
                 "channels": "1",
                 "frameSize": "2",
                 "sampleRate": "48000.0",
+                "bigEndian": "true",
                 "sampleSizeInBits": "24",
             },
             "captureScope": "SESSION",
