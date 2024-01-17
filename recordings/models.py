@@ -63,11 +63,16 @@ class Format(models.Model):
 
 
 class RecordingConfig(models.Model):
-    url = models.FilePathField(max_length=64, default="RECS/")
-    fmt = models.ForeignKey(Format, on_delete=models.PROTECT, verbose_name="Format")
+    CAPTURE_SCOPE_CHOICES = (("S", "SESSION"), ("I", "ITEM"))
 
-    def captureScope(self):
-        return "SESSION"
+    url = models.CharField(max_length=64, default="RECS/")
+    Format = models.ForeignKey(Format, on_delete=models.PROTECT, verbose_name="Format")
+    captureScope = models.CharField(
+        max_length=1, choices=CAPTURE_SCOPE_CHOICES, default="S"
+    )
+
+    def __str__(self):
+        return f"{self.url} - {self.Format}"
 
 
 class MixerName(models.Model):
@@ -103,6 +108,9 @@ class Project(models.Model):
         Speaker, related_name="projects", on_delete=models.PROTECT
     )
     script = models.ForeignKey(Script, null=True, on_delete=models.PROTECT)
+    RecordingConfiguration = models.ForeignKey(
+        RecordingConfig, null=True, on_delete=models.PROTECT
+    )
     recordingMixerName = models.ForeignKey(
         RecordingMixerName, null=True, on_delete=models.PROTECT
     )

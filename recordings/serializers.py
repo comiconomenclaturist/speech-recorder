@@ -3,15 +3,30 @@ from .models import *
 
 
 class FormatSerializer(serializers.ModelSerializer):
+    sampleRate = serializers.FloatField()
+
     class Meta:
         model = Format
+        exclude = ("id",)
+
+
+class RecordingConfigSerializer(serializers.ModelSerializer):
+    Format = FormatSerializer()
+    captureScope = serializers.SerializerMethodField()
+
+    def get_captureScope(self, instance):
+        return instance.get_captureScope_display()
+
+    class Meta:
+        model = RecordingConfig
+        exclude = ("id",)
 
 
 class ProjectSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source="__str__")
     recordingMixerName = serializers.SerializerMethodField()
     playbackMixerName = serializers.SerializerMethodField()
-    RecordingConfiguration = serializers.SerializerMethodField()
+    RecordingConfiguration = RecordingConfigSerializer()
     PromptConfiguration = serializers.SerializerMethodField()
     Speakers = serializers.SerializerMethodField()
 
@@ -20,19 +35,6 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     def get_playbackMixerName(self, instance):
         return instance.playbackMixerName
-
-    def get_RecordingConfiguration(self, instance):
-        return {
-            "url": "RECS/",
-            "Format": {
-                "channels": "1",
-                "frameSize": "3",
-                "sampleRate": "48000.0",
-                "bigEndian": "true",
-                "sampleSizeInBits": "24",
-            },
-            "captureScope": "SESSION",
-        }
 
     def get_PromptConfiguration(self, instance):
         return {
