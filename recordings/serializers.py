@@ -19,7 +19,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     def get_PromptConfiguration(self, instance):
         return {
-            "promptsUrl": f"{instance.script}.xml",
+            "promptsUrl": f"{instance.script.pk}_script.xml",
             "InstructionsFont": {"family": "SansSerif"},
             "PromptFont": {"family": "SansSerif"},
             "DescriptionFont": {"family": "SansSerif"},
@@ -28,7 +28,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         }
 
     def get_Speakers(self, instance):
-        return {"speakersUrl": f"speaker_{instance.speaker.pk}.xml"}
+        return {"speakersUrl": f"{instance.speaker.pk}_speakers.xml"}
 
     class Meta:
         model = Project
