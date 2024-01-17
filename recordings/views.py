@@ -101,6 +101,9 @@ class CreateProjectView(generics.CreateAPIView):
             project.recordingMixerName = RecordingMixerName.objects.filter(
                 default=True
             ).first()
+            project.playbackMixerName = PlaybackMixerName.objects.filter(
+                default=True
+            ).first()
             project.save()
 
         return Response({}, status=200)
