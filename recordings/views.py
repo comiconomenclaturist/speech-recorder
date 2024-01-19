@@ -86,8 +86,7 @@ class CreateProjectView(generics.CreateAPIView):
                     speaker.accent = answer["choice"]["label"]
                 elif answer["field"]["id"] == "ntwEuuLyrVpH":
                     invitee = calendly(answer["url"])
-                    speaker.forename = invitee["resource"]["first_name"]
-                    speaker.name = invitee["resource"]["last_name"]
+                    speaker.name = invitee["resource"]["name"]
                     speaker.email = invitee["resource"]["email"]
 
                     event = calendly(invitee["resource"]["event"])
