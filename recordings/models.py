@@ -12,7 +12,6 @@ class Speaker(models.Model):
     )
     personId = models.BigAutoField(primary_key=True)
     dateOfBirth = models.DateField(verbose_name="Date of birth")
-    forename = models.CharField(max_length=64, null=True, blank=True)
     name = models.CharField(max_length=64)
     email = models.EmailField()
     registered = models.DateTimeField(auto_now_add=True)
@@ -22,7 +21,7 @@ class Speaker(models.Model):
     accent = models.CharField(max_length=64, default="", blank=True)
 
     def __str__(self):
-        return f"{self.forename} {self.name}"
+        return self.name
 
 
 class Script(models.Model):
