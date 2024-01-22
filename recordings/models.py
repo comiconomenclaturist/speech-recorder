@@ -141,7 +141,7 @@ class RecPrompt(models.Model):
     finalsilence = models.PositiveIntegerField(
         default=4000, help_text="Duration in milliseconds"
     )
-    recording = models.FileField(upload_to=upload_path, null=True)
+    recording = models.FileField(upload_to=upload_path, null=True, blank=True)
 
     def __str__(self):
         return self.mediaitem
