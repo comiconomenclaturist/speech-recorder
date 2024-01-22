@@ -111,6 +111,10 @@ USE_I18N = True
 
 USE_TZ = True
 
+FILE_UPLOAD_HANDLERS = [
+    "django.core.files.uploadhandler.TemporaryFileUploadHandler",
+]
+
 DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
 AWS_STORAGE_BUCKET_NAME = env("SPEECH_REC_BUCKET")
 AWS_S3_ACCESS_KEY_ID = env("AWS_S3_ACCESS_KEY_ID")
