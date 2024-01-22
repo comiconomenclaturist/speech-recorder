@@ -129,4 +129,4 @@ class ScriptSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Script
-        exclude = ("speaker", "id")
+        exclude = ("speaker", "id", "project")
