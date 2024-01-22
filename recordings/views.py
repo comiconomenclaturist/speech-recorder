@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from django.http import Http404
 from django.utils.timezone import now
+from django.db import transaction
 from psycopg2.extras import DateTimeTZRange
 from urllib.parse import urlparse
 from speech_recording import settings
@@ -71,12 +72,15 @@ class CreateProjectView(generics.CreateAPIView):
     permission_classes = [CreateProjectPermission]
 
     @csrf_exempt
+    @transaction.atomic
     def post(self, request, *args, **kwargs):
         data = request.data
-        project = Project()
-        speaker = Speaker()
 
         if data["event_type"] == "form_response":
+            project = Project()
+            speaker = Speaker()
+            script = Script.objects.filter(project__isnull=True).first()
+
             for answer in data["form_response"]["answers"]:
                 if answer["field"]["id"] == "LwvCDF97Z3oh":
                     speaker.sex = answer["choice"]["label"][0]
@@ -96,7 +100,6 @@ class CreateProjectView(generics.CreateAPIView):
                     )
 
             speaker.save()
-            project.script = Script.objects.filter(project__isnull=True).first()
             project.speaker = speaker
             project.RecordingConfiguration = RecordingConfig.objects.first()
             project.recordingMixerName = RecordingMixerName.objects.filter(
@@ -106,5 +109,7 @@ class CreateProjectView(generics.CreateAPIView):
                 default=True
             ).first()
             project.save()
+            script.project = project
+            script.save()
 
         return Response({}, status=200)

@@ -24,33 +24,6 @@ class Speaker(models.Model):
         return self.name
 
 
-class Script(models.Model):
-    speaker = models.ForeignKey(
-        Speaker, null=True, blank=True, on_delete=models.PROTECT
-    )
-
-    class Meta:
-        ordering = ("id",)
-
-    def __str__(self):
-        return f"script_{self.pk}"
-
-
-class RecPrompt(models.Model):
-    script = models.ForeignKey(
-        Script,
-        null=True,
-        blank=True,
-        related_name="recprompts",
-        on_delete=models.PROTECT,
-    )
-    mediaitem = models.CharField(unique=True, max_length=255)
-    finalsilence = models.PositiveIntegerField(default=4000)
-
-    def __str__(self):
-        return self.mediaitem
-
-
 class Format(models.Model):
     channels = models.PositiveSmallIntegerField(default=1)
     frameSize = models.PositiveSmallIntegerField(default=3)
@@ -107,7 +80,12 @@ class Project(models.Model):
     speaker = models.ForeignKey(
         Speaker, related_name="projects", on_delete=models.PROTECT
     )
-    script = models.ForeignKey(Script, null=True, on_delete=models.PROTECT)
+    script = models.ForeignKey(
+        "recordings.Script",
+        null=True,
+        related_name="projects",
+        on_delete=models.PROTECT,
+    )
     RecordingConfiguration = models.ForeignKey(
         RecordingConfig, null=True, on_delete=models.PROTECT
     )
@@ -129,3 +107,41 @@ class Project(models.Model):
 
     def __str__(self):
         return f"{self.session.lower.strftime('%Y-%m-%d %H:%M')} - {self.speaker}"
+
+
+class Script(models.Model):
+    speaker = models.ForeignKey(
+        Speaker, null=True, blank=True, on_delete=models.PROTECT
+    )
+    project = models.ForeignKey(
+        Project, null=True, blank=True, related_name="scripts", on_delete=models.PROTECT
+    )
+
+    class Meta:
+        ordering = ("id",)
+
+    def __str__(self):
+        return f"script_{self.pk}"
+
+
+def upload_path(instance, filename):
+    # date = instance.script.project.session.lower
+    return f"{instance.script}"
+
+
+class RecPrompt(models.Model):
+    script = models.ForeignKey(
+        Script,
+        null=True,
+        blank=True,
+        related_name="recprompts",
+        on_delete=models.PROTECT,
+    )
+    mediaitem = models.CharField(unique=True, max_length=255)
+    finalsilence = models.PositiveIntegerField(
+        default=4000, help_text="Duration in milliseconds"
+    )
+    recording = models.FileField(upload_to=upload_path, null=True)
+
+    def __str__(self):
+        return self.mediaitem
