@@ -2,13 +2,13 @@ from django.contrib import admin
 from .models import *
 
 
-class RecordingInline(admin.TabularInline):
-    model = Recording
+class RecPromptInline(admin.TabularInline):
+    model = RecPrompt
 
 
 @admin.register(Script)
 class ScriptAdmin(admin.ModelAdmin):
-    inlines = (RecordingInline,)
+    inlines = (RecPromptInline,)
     list_display = ("__str__", "speaker")
 
 
@@ -48,6 +48,6 @@ class PlaybackMixerNameAdmin(MixerNameAdmin):
     pass
 
 
-admin.site.register(Recording)
+admin.site.register(RecPrompt)
 admin.site.register(RecordingConfig)
 admin.site.register(Format)

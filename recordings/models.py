@@ -36,12 +36,12 @@ class Script(models.Model):
         return f"script_{self.pk}"
 
 
-class Recording(models.Model):
+class RecPrompt(models.Model):
     script = models.ForeignKey(
         Script,
         null=True,
         blank=True,
-        related_name="recording",
+        related_name="recprompts",
         on_delete=models.PROTECT,
     )
     mediaitem = models.CharField(unique=True, max_length=255)

@@ -79,7 +79,7 @@ class RecordingSerializer(serializers.ModelSerializer):
     recprompt = serializers.SerializerMethodField()
 
     class Meta:
-        model = Recording
+        model = RecPrompt
         exclude = ("id", "script", "mediaitem")
 
     def get_recprompt(self, instance):
@@ -95,7 +95,7 @@ class ScriptSerializer(serializers.ModelSerializer):
     script = serializers.SerializerMethodField()
 
     def get_recordings(self, instance):
-        data = RecordingSerializer(instance.recording.all(), many=True).data
+        data = RecordingSerializer(instance.recprompts.all(), many=True).data
         recordings = []
 
         for i, rec in enumerate(data):
