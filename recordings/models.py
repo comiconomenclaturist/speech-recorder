@@ -45,6 +45,7 @@ class Recording(models.Model):
         on_delete=models.PROTECT,
     )
     mediaitem = models.CharField(unique=True, max_length=255)
+    finalsilence = models.PositiveIntegerField(default=4000)
 
     def __str__(self):
         return self.mediaitem

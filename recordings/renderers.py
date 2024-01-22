@@ -3,38 +3,11 @@ from xml.sax.saxutils import XMLGenerator
 from django.utils.encoding import force_str
 from speech_recording.xml_renderer import CustomXMLRenderer
 from io import StringIO
-from .models import RecordingMixerName, PlaybackMixerName
 
 
 class ProjectXMLRenderer(CustomXMLRenderer):
     xml_attrs = {"standalone": "no"}
     root_tag = ("ProjectConfiguration", {"version": "4.0.0"})
-
-    def _to_xml(self, xml, data):
-        if isinstance(data, (list, tuple)):
-            for item in data:
-                xml.startElement(self.item_tag_name, {})
-                self._to_xml(xml, item)
-                xml.endElement(self.item_tag_name)
-
-        elif isinstance(data, dict):
-            for key, value in data.items():
-                if isinstance(value, (RecordingMixerName, PlaybackMixerName)):
-                    # Add providerId attribute to soundcard fields
-                    xml.startElement(key, {"providerId": value.providerId})
-                    self._to_xml(xml, value)
-                    xml.endElement(key)
-                else:
-                    xml.startElement(key, {})
-                    self._to_xml(xml, value)
-                    xml.endElement(key)
-
-        elif data is None:
-            # Don't output any value
-            pass
-
-        else:
-            xml.characters(force_str(data))
 
 
 class SpeakerXMLRenderer(CustomXMLRenderer):
@@ -65,9 +38,9 @@ class SpeakerXMLRenderer(CustomXMLRenderer):
         return stream.getvalue()
 
 
-class ScriptXMLRenderer(XMLRenderer):
+class ScriptXMLRenderer(CustomXMLRenderer):
     root_tag_name = "script"
-    item_tag_name = "mediaitem"
+    item_tag_name = "recording"
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         """
@@ -87,43 +60,3 @@ class ScriptXMLRenderer(XMLRenderer):
 
         xml.endDocument()
         return stream.getvalue()
-
-    def _to_xml(self, xml, data):
-        if isinstance(data, (list, tuple)):
-            for index, item in enumerate(data):
-                xml.startElement(
-                    "recording",
-                    {"finalsilence": "4000", "itemcode": str((index)).zfill(4)},
-                )
-                xml.startElement("recprompt", {})
-                xml.startElement(self.item_tag_name, {"languageISO639code": "en"})
-                self._to_xml(xml, item)
-                xml.endElement(self.item_tag_name)
-                xml.endElement("recprompt")
-                xml.endElement("recording")
-
-        elif isinstance(data, dict):
-            pk = data.pop("id", 0)
-            xml.startElement(self.root_tag_name, {"id": f"script_{pk}"})
-            xml.startElement("recordingscript", {})
-            xml.startElement(
-                "section",
-                {
-                    "name": f"script_{pk}",
-                    "promptphase": "recording",
-                    "speakerdisplay": "true",
-                },
-            )
-            for key, value in data.items():
-                self._to_xml(xml, value)
-
-            xml.endElement("section")
-            xml.endElement("recordingscript")
-            xml.endElement(self.root_tag_name)
-
-        elif data is None:
-            # Don't output any value
-            pass
-
-        else:
-            xml.characters(force_str(data))

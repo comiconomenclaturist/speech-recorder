@@ -31,10 +31,16 @@ class ProjectSerializer(serializers.ModelSerializer):
     Speakers = serializers.SerializerMethodField()
 
     def get_recordingMixerName(self, instance):
-        return instance.recordingMixerName
+        return {
+            "recordingMixerName": instance.recordingMixerName.name,
+            "attrs": {"providerId": instance.recordingMixerName.providerId},
+        }
 
     def get_playbackMixerName(self, instance):
-        return instance.playbackMixerName
+        return {
+            "playbackMixerName": instance.playbackMixerName.name,
+            "attrs": {"providerId": instance.playbackMixerName.providerId},
+        }
 
     def get_PromptConfiguration(self, instance):
         return {
@@ -69,9 +75,58 @@ class SpeakerSerializer(serializers.ModelSerializer):
         exclude = ("email",)
 
 
+class RecordingSerializer(serializers.ModelSerializer):
+    recprompt = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Recording
+        exclude = ("id", "script", "mediaitem")
+
+    def get_recprompt(self, instance):
+        return {
+            "mediaitem": {
+                "mediaitem": instance.mediaitem,
+                "attrs": {"languageISO639code": "en"},
+            }
+        }
+
+
 class ScriptSerializer(serializers.ModelSerializer):
-    recording = serializers.StringRelatedField(many=True, read_only=True)
+    script = serializers.SerializerMethodField()
+
+    def get_recordings(self, instance):
+        data = RecordingSerializer(instance.recording.all(), many=True).data
+        recordings = []
+
+        for i, rec in enumerate(data):
+            recordings.append(
+                {
+                    "recprompt": rec["recprompt"],
+                    "attrs": {
+                        "finalsilence": str(rec["finalsilence"]),
+                        "itemcode": str(i).zfill(4),
+                    },
+                }
+            )
+        return recordings
+
+    def get_script(self, instance):
+        return {
+            "recordingscript": {
+                "section": {
+                    "section": self.get_recordings(instance),
+                    "attrs": {
+                        "name": f"script_{instance.id}",
+                        "promptphase": "recording",
+                        "speakerdisplay": "true",
+                    },
+                },
+            },
+            "attrs": {
+                "id": f"script_{instance.id}",
+            },
+        }
 
     class Meta:
         model = Script
-        exclude = ("speaker",)
+        exclude = ("speaker", "id")
