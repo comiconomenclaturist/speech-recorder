@@ -1,5 +1,17 @@
 from django.contrib import admin
 from .models import *
+from .filters import *
+
+
+@admin.register(RecPrompt)
+class RecPromptAdmin(admin.ModelAdmin):
+    model = RecPrompt
+    list_display = ("__str__", "script", "project")
+    list_filter = (ProjectFilter,)
+
+    def project(self, obj):
+        if obj.script and obj.script.project:
+            return obj.script.project
 
 
 class RecPromptInline(admin.TabularInline):
@@ -48,6 +60,5 @@ class PlaybackMixerNameAdmin(MixerNameAdmin):
     pass
 
 
-admin.site.register(RecPrompt)
 admin.site.register(RecordingConfig)
 admin.site.register(Format)
