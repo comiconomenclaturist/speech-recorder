@@ -77,8 +77,9 @@ class PlaybackMixerName(MixerName):
 
 class Project(models.Model):
     session = DateTimeRangeField()
-    speaker = models.ForeignKey(
-        Speaker, related_name="projects", on_delete=models.PROTECT
+    speaker = models.OneToOneField(Speaker, on_delete=models.PROTECT)
+    script = models.OneToOneField(
+        "recordings.Script", null=True, related_name="prj", on_delete=models.PROTECT
     )
     RecordingConfiguration = models.ForeignKey(
         RecordingConfig, null=True, on_delete=models.PROTECT
