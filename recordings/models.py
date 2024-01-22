@@ -80,12 +80,6 @@ class Project(models.Model):
     speaker = models.ForeignKey(
         Speaker, related_name="projects", on_delete=models.PROTECT
     )
-    script = models.ForeignKey(
-        "recordings.Script",
-        null=True,
-        related_name="projects",
-        on_delete=models.PROTECT,
-    )
     RecordingConfiguration = models.ForeignKey(
         RecordingConfig, null=True, on_delete=models.PROTECT
     )
@@ -106,13 +100,12 @@ class Project(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.session.lower.strftime('%Y-%m-%d %H:%M')} - {self.speaker}"
+        if self.session and self.speaker:
+            return f"{self.session.lower.strftime('%Y-%m-%d %H:%M')} - {self.speaker}"
+        return super().__str__()
 
 
 class Script(models.Model):
-    speaker = models.ForeignKey(
-        Speaker, null=True, blank=True, on_delete=models.PROTECT
-    )
     project = models.ForeignKey(
         Project, null=True, blank=True, related_name="scripts", on_delete=models.PROTECT
     )
@@ -125,8 +118,8 @@ class Script(models.Model):
 
 
 def upload_path(instance, filename):
-    # date = instance.script.project.session.lower
-    return f"{instance.script}"
+    date = instance.script.project.session.lower
+    return f"{date.strftime('%Y/%m/%d/')}{instance.script.project.id}"
 
 
 class RecPrompt(models.Model):

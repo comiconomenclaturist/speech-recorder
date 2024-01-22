@@ -9,7 +9,7 @@ class RecPromptInline(admin.TabularInline):
 @admin.register(Script)
 class ScriptAdmin(admin.ModelAdmin):
     inlines = (RecPromptInline,)
-    list_display = ("__str__", "speaker")
+    list_display = ("__str__", "project")
 
 
 @admin.register(Project)
