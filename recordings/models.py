@@ -118,6 +118,7 @@ class Project(models.Model):
     )
 
     class Meta:
+        ordering = ("session__startswith",)
         constraints = [
             ExclusionConstraint(
                 name="exclude_overlapping_sessions",
