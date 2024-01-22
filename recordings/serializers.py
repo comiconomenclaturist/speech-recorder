@@ -44,7 +44,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     def get_PromptConfiguration(self, instance):
         return {
-            "promptsUrl": f"{instance.scripts.get().pk}_script.xml",
+            "promptsUrl": f"{instance.script.pk}_script.xml",
             "InstructionsFont": {"family": "SansSerif"},
             "PromptFont": {"family": "SansSerif"},
             "DescriptionFont": {"family": "SansSerif"},

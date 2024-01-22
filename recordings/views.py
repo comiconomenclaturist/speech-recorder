@@ -79,7 +79,6 @@ class CreateProjectView(generics.CreateAPIView):
         if data["event_type"] == "form_response":
             project = Project()
             speaker = Speaker()
-            script = Script.objects.filter(project__isnull=True).first()
 
             for answer in data["form_response"]["answers"]:
                 if answer["field"]["id"] == "LwvCDF97Z3oh":
@@ -108,8 +107,7 @@ class CreateProjectView(generics.CreateAPIView):
             project.playbackMixerName = PlaybackMixerName.objects.filter(
                 default=True
             ).first()
+            project.script = Script.objects.filter(project__isnull=True).first()
             project.save()
-            script.project = project
-            script.save()
 
         return Response({}, status=200)

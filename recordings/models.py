@@ -79,7 +79,7 @@ class Project(models.Model):
     session = DateTimeRangeField()
     speaker = models.OneToOneField(Speaker, on_delete=models.PROTECT)
     script = models.OneToOneField(
-        "recordings.Script", null=True, related_name="prj", on_delete=models.PROTECT
+        "recordings.Script", null=True, on_delete=models.PROTECT
     )
     RecordingConfiguration = models.ForeignKey(
         RecordingConfig, null=True, on_delete=models.PROTECT
@@ -107,10 +107,6 @@ class Project(models.Model):
 
 
 class Script(models.Model):
-    project = models.ForeignKey(
-        Project, null=True, blank=True, related_name="scripts", on_delete=models.PROTECT
-    )
-
     class Meta:
         ordering = ("id",)
 
