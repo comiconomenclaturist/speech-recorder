@@ -57,7 +57,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        exclude = ("id", "session", "script", "speaker")
+        exclude = ("id", "session", "speaker")
 
 
 class SpeakerSerializer(serializers.ModelSerializer):
