@@ -134,7 +134,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     "DEFAULT_PARSER_CLASSES": ("rest_framework.parsers.JSONParser",),
-    "DEFAULT_RENDERER_CLASSES": ("speech_recording.xml_renderer.CustomXMLRenderer",),
+    "DEFAULT_RENDERER_CLASSES": ("recordings.renderers.CustomXMLRenderer",),
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
