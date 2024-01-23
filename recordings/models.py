@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.postgres.fields import DateTimeRangeField, RangeOperators
 from django.contrib.postgres.constraints import ExclusionConstraint
+from django.db.models.signals import post_delete
+from django.dispatch.dispatcher import receiver
+from .fields import RecordingField
 import uuid
 
 
@@ -116,7 +119,7 @@ class Script(models.Model):
 
 def upload_path(instance, filename):
     date = instance.script.project.session.lower
-    return f"{date.strftime('%Y/%m/%d/')}{instance.script.project.id}"
+    return f"{date.strftime('%Y/%m/%d/%H:%M/')}/{filename}"
 
 
 class RecPrompt(models.Model):
@@ -131,7 +134,15 @@ class RecPrompt(models.Model):
     finalsilence = models.PositiveIntegerField(
         default=4000, help_text="Duration in milliseconds"
     )
-    recording = models.FileField(upload_to=upload_path, null=True, blank=True)
+    recording = RecordingField(upload_to=upload_path, null=True, blank=True)
 
     def __str__(self):
         return self.mediaitem
+
+
+@receiver(post_delete, sender=RecPrompt)
+def delete_recording(sender, instance, **kwargs):
+    """
+    Delete the recording from storage if the RecPrompt is deleted
+    """
+    instance.recording.delete(False)
