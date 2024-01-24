@@ -43,7 +43,7 @@ class ProjectAdmin(admin.ModelAdmin):
 @admin.register(Speaker)
 class SpeakerAdmin(admin.ModelAdmin):
     model = Speaker
-    list_display = ("__str__", "email")
+    list_display = ("__str__", "email", "project")
     search_fields = ("name", "email")
 
 
