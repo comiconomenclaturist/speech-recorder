@@ -23,6 +23,9 @@ class Speaker(models.Model):
     code = models.CharField(max_length=64, default="", blank=True)
     accent = models.CharField(max_length=64, default="", blank=True)
 
+    def get_absolute_url(self):
+        return f"/api/speakers/{self.pk}/"
+
     def __str__(self):
         return self.name
 
@@ -103,6 +106,9 @@ class Project(models.Model):
             ),
         ]
 
+    def get_absolute_url(self):
+        return f"/api/projects/{self.pk}/"
+
     def __str__(self):
         if self.session and self.speaker:
             return f"{self.session.lower.strftime('%Y-%m-%d %H:%M')} - {self.speaker}"
@@ -112,6 +118,9 @@ class Project(models.Model):
 class Script(models.Model):
     class Meta:
         ordering = ("id",)
+
+    def get_absolute_url(self):
+        return f"/api/scripts/{self.pk}/"
 
     def __str__(self):
         return f"script_{self.pk}"
