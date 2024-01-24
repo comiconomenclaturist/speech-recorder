@@ -43,8 +43,12 @@ class ProjectAdmin(admin.ModelAdmin):
 @admin.register(Speaker)
 class SpeakerAdmin(admin.ModelAdmin):
     model = Speaker
-    list_display = ("__str__", "email", "project")
+    list_display = ("__str__", "email", "booking")
     search_fields = ("name", "email")
+
+    def booking(self, obj):
+        if obj:
+            return obj.project.session.lower
 
 
 class MixerNameAdmin(admin.ModelAdmin):
