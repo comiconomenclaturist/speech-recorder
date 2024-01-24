@@ -37,6 +37,8 @@ class ProjectAdmin(admin.ModelAdmin):
             return obj.session.upper
 
     list_display = ("start", "end", "speaker")
+    list_filter = (UpcomingFilter,)
+    search_fields = ("speaker__name",)
 
 
 @admin.register(Speaker)
