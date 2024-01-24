@@ -28,17 +28,15 @@ class ScriptAdmin(admin.ModelAdmin):
 class ProjectAdmin(admin.ModelAdmin):
     model = Project
 
-    def start(self, obj):
+    def booking(self, obj):
         if obj:
             return obj.session.lower
 
-    def end(self, obj):
-        if obj:
-            return obj.session.upper
+    booking.admin_order_field = "session__startswith"
 
-    list_display = ("start", "end", "speaker")
+    list_display = ("booking", "speaker", "script")
     list_filter = (UpcomingFilter,)
-    search_fields = ("speaker__name",)
+    search_fields = ("speaker__name", "speaker__email")
 
 
 @admin.register(Speaker)
