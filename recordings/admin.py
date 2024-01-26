@@ -22,7 +22,7 @@ class RecPromptInline(admin.TabularInline):
 class ScriptAdmin(admin.ModelAdmin):
     inlines = (RecPromptInline,)
     list_display = ("__str__", "project")
-    search_fields = ("project__speaker__name", "project__speaker__email")
+    search_fields = ("project__speaker__name", "project__speaker__email", "recprompts__mediaitem")
 
 
 @admin.register(Project)
