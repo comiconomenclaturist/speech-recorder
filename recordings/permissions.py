@@ -1,5 +1,4 @@
 from rest_framework.permissions import BasePermission
-from django.utils.timezone import now
 from datetime import datetime, timedelta
 from speech_recording import settings
 import hashlib
@@ -30,28 +29,19 @@ class CalendlyPermission(BasePermission):
     def has_permission(self, request, view):
         SIGNING_KEY = settings.env("CALENDLY_WEBHOOK_SIGNING_KEY")
 
-        try:
-            signature = request.headers.get("Calendly-Webhook-Signature")
+        signature = request.headers.get("Calendly-Webhook-Signature")
 
-            values = [val for val in signature.split(",")]
-            t, sig = [val.split("=")[1] for val in values]
+        values = [val for val in signature.split(",")]
+        t, sig = [val.split("=")[1] for val in values]
 
-            payload = f"{t}.{request.body}"
-            digest = hmac.new(
-                SIGNING_KEY.encode("utf-8"), payload, hashlib.sha256
-            ).digest()
+        body = request.read().decode("utf-8")
+        payload = f"{t}.{body}".encode("utf-8")
+        mac = hmac.new(SIGNING_KEY.encode("utf-8"), payload, hashlib.sha256)
 
-            e = base64.b64encode(digest).decode()
+        if mac.hexdigest() == sig:
+            tolerance = datetime.utcnow() - timedelta(minutes=3)
 
-            if e == sig:
-                if datetime.fromtimestamp(t) > now() - timedelta(minutes=3):
-                    return True
-        except Exception as e:
-            with open("/tmp/test.txt", "a") as f:
-                f.write("\n")
-                f.write(e)
-                f.write("*" * 40)
-                f.write("\n")
-            return False
+            if datetime.fromtimestamp(int(t)) > tolerance:
+                return True
 
         return False
