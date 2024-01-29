@@ -52,6 +52,23 @@ class ScriptsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     renderer_classes = (ScriptXMLRenderer,)
 
 
+def calendly(url):
+    url = urlparse(url)
+    url = f"https://api.calendly.com/{url.path}"
+
+    r = requests.get(
+        url,
+        headers={
+            "Authorization": f"Bearer {settings.env('CALENDLY_TOKEN')}",
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        },
+    )
+    if r.status_code == 200:
+        return json.loads(r.text)
+    raise Exception(r)
+
+
 class CreateProjectView(generics.CreateAPIView):
     permission_classes = [TypeFormPermission]
 
