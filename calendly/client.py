@@ -17,8 +17,10 @@ class Calendly:
         else:
             r = request(method, url, headers=self.headers, params=params)
 
-        if "application/json" in r.headers["Content-Type"] and r.status_code == 200:
-            return json.loads(r.text)
+        if r.status_code == 200:
+            if "application/json" in r.headers.get("Content-Type"):
+                return json.loads(r.text)
+            return r.text
 
         raise Exception(r.text)
 
