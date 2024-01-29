@@ -27,21 +27,24 @@ class TypeFormPermission(BasePermission):
 
 class CalendlyPermission(BasePermission):
     def has_permission(self, request, view):
-        SIGNING_KEY = settings.env("CALENDLY_WEBHOOK_SIGNING_KEY")
+        try:
+            SIGNING_KEY = settings.env("CALENDLY_WEBHOOK_SIGNING_KEY")
 
-        signature = request.headers.get("Calendly-Webhook-Signature")
+            signature = request.headers.get("Calendly-Webhook-Signature")
 
-        values = [val for val in signature.split(",")]
-        t, sig = [val.split("=")[1] for val in values]
+            values = [val for val in signature.split(",")]
+            t, sig = [val.split("=")[1] for val in values]
 
-        body = request.body.decode("utf-8")
-        payload = f"{t}.{body}".encode("utf-8")
-        mac = hmac.new(SIGNING_KEY.encode("utf-8"), payload, hashlib.sha256)
+            body = request.body.decode("utf-8")
+            payload = f"{t}.{body}".encode("utf-8")
+            mac = hmac.new(SIGNING_KEY.encode("utf-8"), payload, hashlib.sha256)
 
-        if mac.hexdigest() == sig:
-            tolerance = datetime.utcnow() - timedelta(minutes=3)
+            if mac.hexdigest() == sig:
+                tolerance = datetime.utcnow() - timedelta(minutes=3)
 
-            if datetime.fromtimestamp(int(t)) > tolerance:
-                return True
+                if datetime.fromtimestamp(int(t)) > tolerance:
+                    return True
 
-        return False
+            return False
+        except:
+            return False
