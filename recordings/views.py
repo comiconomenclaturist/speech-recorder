@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 from speech_recording import settings
 from .models import *
 from .serializers import *
-from .permissions import CreateProjectPermission
+from .permissions import TypeFormPermission, CalendlyPermission
 from .renderers import *
 import json
 import requests
@@ -69,7 +69,7 @@ def calendly(url):
 
 
 class CreateProjectView(generics.CreateAPIView):
-    permission_classes = [CreateProjectPermission]
+    permission_classes = [TypeFormPermission]
 
     @csrf_exempt
     @transaction.atomic
@@ -109,5 +109,24 @@ class CreateProjectView(generics.CreateAPIView):
             ).first()
             project.script = Script.objects.filter(project__isnull=True).first()
             project.save()
+
+        return Response({}, status=200)
+
+
+class CalendlyWebhookView(generics.CreateAPIView):
+    permission_classes = [CalendlyPermission]
+
+    @csrf_exempt
+    def post(self, request, *args, **kwargs):
+        data = request.data
+
+        with open("/tmp/test.txt", "a") as f:
+            f.write(data + "\n")
+            f.write("*" * 40)
+            f.write("\n")
+
+        # if data["event"] == "invitee.created":
+        #     data["payload"]["scheduled_event"]["start_time"]
+        #     data["payload"]["scheduled_event"]["end_time"]
 
         return Response({}, status=200)
