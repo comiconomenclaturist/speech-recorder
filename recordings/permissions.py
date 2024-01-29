@@ -46,7 +46,12 @@ class CalendlyPermission(BasePermission):
             if e == sig:
                 if datetime.fromtimestamp(t) > now() - timedelta(minutes=3):
                     return True
-        except:
+        except Exception as e:
+            with open("/tmp/test.txt", "a") as f:
+                f.write("\n")
+                f.write(e)
+                f.write("*" * 40)
+                f.write("\n")
             return False
 
         return False
