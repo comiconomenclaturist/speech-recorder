@@ -1,6 +1,8 @@
 from django.contrib import admin
+from dateutil.relativedelta import relativedelta
 from .models import *
 from .filters import *
+import datetime
 
 
 @admin.register(RecPrompt)
@@ -29,6 +31,11 @@ class ScriptAdmin(admin.ModelAdmin):
     )
 
 
+def current():
+    this_month = datetime.datetime.today().replace(day=1)
+    return this_month.combine(this_month, datetime.time())
+
+
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
     model = Project
@@ -40,7 +47,17 @@ class ProjectAdmin(admin.ModelAdmin):
     booking.admin_order_field = "session__startswith"
 
     list_display = ("booking", "speaker", "script")
-    list_filter = (UpcomingFilter,)
+    list_filter = (
+        UpcomingFilter,
+        (
+            "session",
+            DateTimeTZRangeFilterBuilder(
+                title="Session",
+                default_start=current(),
+                default_end=current() + relativedelta(months=1),
+            ),
+        ),
+    )
     search_fields = ("speaker__name", "speaker__email")
 
 
