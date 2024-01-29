@@ -5,15 +5,12 @@ from django.http import Http404
 from django.utils.timezone import now
 from django.db import transaction
 from psycopg2.extras import DateTimeTZRange
-from urllib.parse import urlparse
 from calendly.client import Calendly
 from speech_recording import settings
 from .models import *
 from .serializers import *
 from .permissions import TypeFormPermission, CalendlyPermission
 from .renderers import *
-import json
-import requests
 
 
 class ProjectsViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
