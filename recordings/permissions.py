@@ -34,7 +34,7 @@ class CalendlyPermission(BasePermission):
         values = [val for val in signature.split(",")]
         t, sig = [val.split("=")[1] for val in values]
 
-        body = request.read().decode("utf-8")
+        body = request.body.decode("utf-8")
         payload = f"{t}.{body}".encode("utf-8")
         mac = hmac.new(SIGNING_KEY.encode("utf-8"), payload, hashlib.sha256)
 

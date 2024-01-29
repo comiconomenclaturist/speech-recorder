@@ -1,4 +1,5 @@
 from requests import request
+from urllib.parse import urlparse
 import json
 
 
@@ -9,9 +10,12 @@ class Calendly:
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
         }
+        self.get_user()
 
     def request(self, method, path, data={}, params=None):
+        path = urlparse(path).path
         url = f"{self.base_url}/{path}"
+
         if data:
             r = request(method, url, json=data, headers=self.headers)
         else:
@@ -29,10 +33,10 @@ class Calendly:
         self.organization = response["resource"]["current_organization"]
         self.user = response["resource"]["uri"]
 
-    def list_webhooks(self):
-        if not hasattr(self, "organization") or not hasattr(self, "user"):
-            self.get_user()
+    def get_resource(self, url):
+        return self.request("GET", url)
 
+    def list_webhooks(self):
         querystring = {
             "scope": "user",
             "organization": self.organization,
@@ -41,9 +45,6 @@ class Calendly:
         return self.request("GET", "webhook_subscriptions", params=querystring)
 
     def create_webhook(self, callback, signing_key):
-        if not hasattr(self, "organization") or not hasattr(self, "user"):
-            self.get_user()
-
         payload = {
             "url": callback,
             "events": [

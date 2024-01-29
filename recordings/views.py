@@ -6,6 +6,7 @@ from django.utils.timezone import now
 from django.db import transaction
 from psycopg2.extras import DateTimeTZRange
 from urllib.parse import urlparse
+from calendly.client import Calendly
 from speech_recording import settings
 from .models import *
 from .serializers import *
@@ -83,16 +84,21 @@ class CreateProjectView(generics.CreateAPIView):
             for answer in data["form_response"]["answers"]:
                 if answer["field"]["id"] == "LwvCDF97Z3oh":
                     speaker.sex = answer["choice"]["label"][0]
+
                 elif answer["field"]["id"] == "PtsHxrWJV6UL":
                     speaker.dateOfBirth = answer["date"]
+
                 elif answer["field"]["id"] == "R3boiK7GwVaq":
                     speaker.accent = answer["choice"]["label"]
+
                 elif answer["field"]["id"] == "ntwEuuLyrVpH":
-                    invitee = calendly(answer["url"])
+                    client = Calendly(settings.env("CALENDLY_TOKEN"))
+                    invitee = client.get_resource(answer["url"])
+                    event = client.get_resource(invitee["resource"]["event"])
+
                     speaker.name = invitee["resource"]["name"]
                     speaker.email = invitee["resource"]["email"]
 
-                    event = calendly(invitee["resource"]["event"])
                     project.session = DateTimeTZRange(
                         event["resource"]["start_time"],
                         event["resource"]["end_time"],
@@ -118,15 +124,34 @@ class CalendlyWebhookView(generics.CreateAPIView):
 
     @csrf_exempt
     def post(self, request, *args, **kwargs):
-        data = request.data
+        event = request.data["event"]
+        payload = request.data["payload"]
 
-        with open("/tmp/test.txt", "a") as f:
-            f.write(data + "\n")
-            f.write("*" * 40)
-            f.write("\n")
+        if event == "invitee.canceled":
+            if payload["rescheduled"]:
+                project = Project.objects.get(
+                    session=DateTimeTZRange(
+                        payload["scheduled_event"]["start_time"],
+                        payload["scheduled_event"]["end_time"],
+                    )
+                )
+                client = Calendly(settings.env("CALENDLY_TOKEN"))
+                invitee = client.get_resource(payload["new_invitee"])
+                event = client.get_resource(invitee["resource"]["event"])
 
-        # if data["event"] == "invitee.created":
-        #     data["payload"]["scheduled_event"]["start_time"]
-        #     data["payload"]["scheduled_event"]["end_time"]
+                project.session = DateTimeTZRange(
+                    event["resource"]["start_time"], event["resource"]["end_time"]
+                )
+                project.save()
+
+            else:
+                start = payload["scheduled_event"]["start_time"]
+                end = payload["scheduled_event"]["end_time"]
+                try:
+                    project = Project.objects.get(session=DateTimeTZRange(start, end))
+                    project.delete()
+                    project.speaker.delete()
+                except Project.DoesNotExist:
+                    pass
 
         return Response({}, status=200)
