@@ -1,7 +1,7 @@
 """speech_recording URL Configuration"""
 
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from rest_framework.routers import SimpleRouter
 from recordings.views import *
 
@@ -22,3 +22,6 @@ router.register("api/speakers", SpeakersViewSet, basename="speakers")
 router.register("api/scripts", ScriptsViewSet, basename="scripts")
 
 urlpatterns += router.urls
+
+if settings.DEBUG:
+    urlpatterns += [path("__debug__/", include("debug_toolbar.urls"))]
