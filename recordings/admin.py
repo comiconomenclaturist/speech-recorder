@@ -31,6 +31,18 @@ class ScriptAdmin(admin.ModelAdmin):
     list_display = ("__str__", "project")
     search_fields = ("project__speaker__name", "project__speaker__email")
 
+    def get_search_results(self, request, queryset, search_term):
+        queryset, may_have_duplicates = super().get_search_results(
+            request, queryset, search_term
+        )
+        if search_term:
+            queryset |= self.model.objects.filter(
+                recprompts__mediaitem__contains=search_term
+            )
+            may_have_duplicates = True
+
+        return queryset, may_have_duplicates
+
     def get_queryset(self, *args, **kwargs):
         qs = super().get_queryset(*args, **kwargs)
         return qs.select_related("project", "project__speaker").only(
