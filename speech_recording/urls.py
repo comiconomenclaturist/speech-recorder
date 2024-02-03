@@ -20,6 +20,7 @@ router = SimpleRouter()
 router.register("api/projects", ProjectsViewSet, basename="projects")
 router.register("api/speakers", SpeakersViewSet, basename="speakers")
 router.register("api/scripts", ScriptsViewSet, basename="scripts")
+router.register("api/recordings", RecPromptView, basename="recordings")
 
 urlpatterns += router.urls
 
