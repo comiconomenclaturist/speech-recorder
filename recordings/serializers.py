@@ -75,12 +75,12 @@ class SpeakerSerializer(serializers.ModelSerializer):
         exclude = ("email",)
 
 
-class RecordingSerializer(serializers.ModelSerializer):
+class RecPromptSerializer(serializers.ModelSerializer):
     recprompt = serializers.SerializerMethodField()
 
     class Meta:
         model = RecPrompt
-        exclude = ("id", "script", "mediaitem")
+        exclude = ("script", "mediaitem")
 
     def get_recprompt(self, instance):
         return {
@@ -95,16 +95,16 @@ class ScriptSerializer(serializers.ModelSerializer):
     script = serializers.SerializerMethodField()
 
     def get_recordings(self, instance):
-        data = RecordingSerializer(instance.recprompts.all(), many=True).data
+        data = RecPromptSerializer(instance.recprompts.all(), many=True).data
         recordings = []
 
-        for i, rec in enumerate(data):
+        for recording in data:
             recordings.append(
                 {
-                    "recprompt": rec["recprompt"],
+                    "recprompt": recording["recprompt"],
                     "attrs": {
-                        "finalsilence": str(rec["finalsilence"]),
-                        "itemcode": str(i).zfill(4),
+                        "finalsilence": str(recording["finalsilence"]),
+                        "itemcode": f"{recording['id']:010}",
                     },
                 }
             )

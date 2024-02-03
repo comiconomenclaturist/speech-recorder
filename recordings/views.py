@@ -1,6 +1,7 @@
 from rest_framework import viewsets, mixins, generics
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
+from rest_framework import filters
 from django.views.decorators.csrf import csrf_exempt
 from django.http import Http404
 from django.utils.timezone import now
@@ -138,7 +139,14 @@ class CalendlyWebhookView(generics.CreateAPIView):
         return Response({}, status=200)
 
 
-class RecPromptView(mixins.UpdateModelMixin, viewsets.GenericViewSet):
+class RecPromptView(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = RecPrompt.objects.all()
-    serializer_class = RecordingSerializer
+    serializer_class = RecPromptSerializer
     parser_classes = (MultiPartParser,)
+    search_fields = ["mediaitem"]
+    filter_backends = (filters.SearchFilter,)
