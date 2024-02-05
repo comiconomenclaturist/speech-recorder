@@ -91,6 +91,12 @@ class RecPromptSerializer(serializers.ModelSerializer):
         }
 
 
+class RecordingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecPrompt
+        fields = "__all__"
+
+
 class ScriptSerializer(serializers.ModelSerializer):
     script = serializers.SerializerMethodField()
 

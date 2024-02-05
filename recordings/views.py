@@ -146,7 +146,7 @@ class RecPromptView(
     viewsets.GenericViewSet,
 ):
     queryset = RecPrompt.objects.all()
-    serializer_class = RecPromptSerializer
+    serializer_class = RecordingSerializer
     parser_classes = (MultiPartParser,)
     search_fields = ["mediaitem"]
     filter_backends = (filters.SearchFilter,)
