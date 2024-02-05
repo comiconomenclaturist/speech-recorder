@@ -128,9 +128,7 @@ class Script(models.Model):
 
 def upload_path(instance, filename):
     date = instance.script.project.session.lower
-    return (
-        f"{date.strftime('%Y/%m/%d/PROJECT_ID_')}{instance.script.project}/{filename}"
-    )
+    return f"{date.strftime('%Y/%m/%d/PROJECT_ID_')}{instance.script.project.id}/{filename}"
 
 
 class RecPrompt(models.Model):
