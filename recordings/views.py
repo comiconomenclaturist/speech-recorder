@@ -109,14 +109,18 @@ class CalendlyWebhookView(generics.CreateAPIView):
         event = request.data["event"]
         payload = request.data["payload"]
 
-        if event == "invitee.canceled":
-            if payload["rescheduled"]:
+        if event in ("invitee.canceled", "invitee_no_show.created"):
+            try:
                 project = Project.objects.get(
                     session=DateTimeTZRange(
                         payload["scheduled_event"]["start_time"],
                         payload["scheduled_event"]["end_time"],
                     )
                 )
+            except Project.DoesNotExist:
+                return Response({}, status=200)
+
+            if payload["rescheduled"]:
                 client = Calendly(settings.env("CALENDLY_TOKEN"))
                 invitee = client.get_resource(payload["new_invitee"])
                 event = client.get_resource(invitee["resource"]["event"])
@@ -127,14 +131,9 @@ class CalendlyWebhookView(generics.CreateAPIView):
                 project.save()
 
             else:
-                start = payload["scheduled_event"]["start_time"]
-                end = payload["scheduled_event"]["end_time"]
-                try:
-                    project = Project.objects.get(session=DateTimeTZRange(start, end))
+                if not project.script.recprompts.filter(recording__isnull=False):
                     project.delete()
                     project.speaker.delete()
-                except Project.DoesNotExist:
-                    pass
 
         return Response({}, status=200)
 
