@@ -46,20 +46,15 @@ class ScriptAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        url = urlparse(request.META["HTTP_REFERER"])
+        url = urlparse(request.META.get("HTTP_REFERER"))
 
-        if request.GET.get("_popup") and url.path == "/admin/recordings/project/add/":
-            qs = qs.filter(project__isnull=True)
+        if request.GET.get("_popup") and url.path:
+            if url.path.startswith("/admin/recordings/project/"):
+                qs = qs.filter(project__isnull=True)
 
         return qs.select_related("project", "project__speaker").only(
             "project__session", "project__speaker__name"
         )
-
-    def changelist_view(self, request, extra_context={}):
-        queryset = self.get_queryset(request)
-        if request.GET.get("_popup"):
-            self.queryset = queryset.filter(project__isnull=True)
-        return super().changelist_view(request, extra_context)
 
 
 def current():
