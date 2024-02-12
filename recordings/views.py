@@ -137,6 +137,8 @@ class CalendlyWebhookView(generics.CreateAPIView):
 
             elif event == "invitee_no_show.created":
                 project.no_show = True
+                if not project.script.recprompts.filter(recording__isnull=False):
+                    project.script = None
                 project.save()
 
         return Response({}, status=200)
