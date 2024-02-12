@@ -71,7 +71,7 @@ class ProjectAdmin(admin.ModelAdmin):
 
     booking.admin_order_field = "session__startswith"
 
-    list_display = ("booking", "speaker", "script")
+    list_display = ("booking", "speaker", "script", "no_show")
     list_filter = (
         UpcomingFilter,
         (
@@ -82,6 +82,7 @@ class ProjectAdmin(admin.ModelAdmin):
                 default_end=current() + relativedelta(months=1),
             ),
         ),
+        "no_show",
     )
     search_fields = ("speaker__name", "speaker__email")
 

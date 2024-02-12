@@ -96,6 +96,7 @@ class Project(models.Model):
     playbackMixerName = models.ForeignKey(
         PlaybackMixerName, null=True, on_delete=models.PROTECT
     )
+    no_show = models.BooleanField(default=False)
 
     class Meta:
         ordering = ("session__startswith",)
