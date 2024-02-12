@@ -1,10 +1,12 @@
 from django.db import models
 from django.contrib.postgres.fields import DateTimeRangeField, RangeOperators
 from django.contrib.postgres.constraints import ExclusionConstraint
+from django.core.validators import FileExtensionValidator
 from django.db.models.signals import post_delete
 from django.dispatch.dispatcher import receiver
-from .fields import RecordingField
+from .fields import CustomFileField
 import uuid
+import os
 
 
 class Speaker(models.Model):
@@ -81,6 +83,17 @@ class PlaybackMixerName(MixerName):
     pass
 
 
+def upload_path(instance, filename):
+    if isinstance(instance, Project):
+        filename, extension = os.path.splitext(filename)
+        filename = f"{instance.speaker.name} release form{extension}"
+    else:
+        instance = instance.script.project
+
+    date = instance.session.lower
+    return f"{date.strftime('%Y/%m/%d/PROJECT_ID_')}{instance.id}/{filename}"
+
+
 class Project(models.Model):
     session = DateTimeRangeField()
     speaker = models.OneToOneField(Speaker, on_delete=models.PROTECT)
@@ -97,6 +110,12 @@ class Project(models.Model):
         PlaybackMixerName, null=True, on_delete=models.PROTECT
     )
     no_show = models.BooleanField(default=False)
+    release_form = CustomFileField(
+        upload_to=upload_path,
+        validators=[FileExtensionValidator(["pdf"])],
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         ordering = ("session__startswith",)
@@ -127,11 +146,6 @@ class Script(models.Model):
         return f"script_{self.pk}"
 
 
-def upload_path(instance, filename):
-    date = instance.script.project.session.lower
-    return f"{date.strftime('%Y/%m/%d/PROJECT_ID_')}{instance.script.project.id}/{filename}"
-
-
 class RecPrompt(models.Model):
     script = models.ForeignKey(
         Script,
@@ -144,7 +158,12 @@ class RecPrompt(models.Model):
     finalsilence = models.PositiveIntegerField(
         default=4000, help_text="Duration in milliseconds"
     )
-    recording = RecordingField(upload_to=upload_path, null=True, blank=True)
+    recording = CustomFileField(
+        upload_to=upload_path,
+        validators=[FileExtensionValidator(["wav"])],
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return self.mediaitem
@@ -156,3 +175,11 @@ def delete_recording(sender, instance, **kwargs):
     Delete the recording from storage if the RecPrompt is deleted
     """
     instance.recording.delete(False)
+
+
+@receiver(post_delete, sender=Project)
+def delete_release_form(sender, instance, **kwargs):
+    """
+    Delete the release form from storage if the Project is deleted
+    """
+    instance.release_form.delete(False)

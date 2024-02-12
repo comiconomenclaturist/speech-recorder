@@ -8,13 +8,15 @@ import recordings.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('recordings', '0021_auto_20240122_2245'),
+        ("recordings", "0021_auto_20240122_2245"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='recprompt',
-            name='recording',
-            field=recordings.fields.RecordingField(blank=True, null=True, upload_to=recordings.models.upload_path),
+            model_name="recprompt",
+            name="recording",
+            field=recordings.fields.CustomFileField(
+                blank=True, null=True, upload_to=recordings.models.upload_path
+            ),
         ),
     ]

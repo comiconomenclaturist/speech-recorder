@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class RecordingField(models.FileField):
+class CustomFileField(models.FileField):
     """
     Delete the file from storage if the model field is cleared
     """
@@ -11,4 +11,4 @@ class RecordingField(models.FileField):
             file = getattr(instance, self.attname)
             if file != data:
                 file.delete(save=False)
-        super(RecordingField, self).save_form_data(instance, data)
+        super(CustomFileField, self).save_form_data(instance, data)
