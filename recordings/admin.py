@@ -1,5 +1,6 @@
 from django.contrib import admin
 from dateutil.relativedelta import relativedelta
+from urllib.parse import urlparse
 from .models import *
 from .filters import *
 import datetime
@@ -43,11 +44,22 @@ class ScriptAdmin(admin.ModelAdmin):
 
         return queryset, may_have_duplicates
 
-    def get_queryset(self, *args, **kwargs):
-        qs = super().get_queryset(*args, **kwargs)
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        url = urlparse(request.META["HTTP_REFERER"])
+
+        if request.GET.get("_popup") and url.path == "/admin/recordings/project/add/":
+            qs = qs.filter(project__isnull=True)
+
         return qs.select_related("project", "project__speaker").only(
             "project__session", "project__speaker__name"
         )
+
+    def changelist_view(self, request, extra_context={}):
+        queryset = self.get_queryset(request)
+        if request.GET.get("_popup"):
+            self.queryset = queryset.filter(project__isnull=True)
+        return super().changelist_view(request, extra_context)
 
 
 def current():
@@ -85,6 +97,7 @@ class ProjectAdmin(admin.ModelAdmin):
         "no_show",
     )
     search_fields = ("speaker__name", "speaker__email")
+    raw_id_fields = ("script", "speaker")
 
 
 @admin.register(Speaker)
@@ -98,8 +111,8 @@ class SpeakerAdmin(admin.ModelAdmin):
         if obj:
             return obj.project.session.lower
 
-    def get_queryset(self, *args, **kwargs):
-        qs = super().get_queryset(*args, **kwargs)
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
         return qs.select_related("project").only("name", "sex", "email")
 
 
