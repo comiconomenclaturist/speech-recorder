@@ -57,7 +57,14 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        exclude = ("id", "session", "speaker", "script")
+        fields = (
+            "name",
+            "recordingMixerName",
+            "playbackMixerName",
+            "RecordingConfiguration",
+            "PromptConfiguration",
+            "Speakers",
+        )
 
 
 class SpeakerSerializer(serializers.ModelSerializer):
