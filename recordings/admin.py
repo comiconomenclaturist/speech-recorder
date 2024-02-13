@@ -66,8 +66,8 @@ def current():
 class ProjectAdmin(admin.ModelAdmin):
     model = Project
 
-    def get_queryset(self, *args, **kwargs):
-        qs = super().get_queryset(*args, **kwargs)
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
         return qs.select_related("speaker", "script").only(
             "session", "speaker__name", "script"
         )
