@@ -25,6 +25,19 @@ class Speaker(models.Model):
     code = models.CharField(max_length=64, default="", blank=True)
     accent = models.CharField(max_length=64, default="", blank=True)
 
+    @property
+    def age(self):
+        """
+        Speakers age at the time of the recording session
+        """
+        dob = self.dateOfBirth
+
+        if self.project and dob:
+            date = self.project.session.lower
+            return (
+                date.year - dob.year - ((date.month, date.day) < (dob.month, dob.day))
+            )
+
     def get_absolute_url(self):
         return f"/api/speakers/{self.pk}/"
 
