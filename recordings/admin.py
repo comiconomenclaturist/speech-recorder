@@ -1,9 +1,16 @@
 from django.contrib import admin
 from dateutil.relativedelta import relativedelta
+from django.utils.html import format_html
+from django.urls import path
+from django.http import HttpResponse
 from urllib.parse import urlparse
+from zipfile import ZipFile
 from .models import *
+from .views import ProjectsViewSet, SpeakersViewSet, ScriptsViewSet
 from .filters import *
+from speech_recording import settings
 import datetime
+import io
 
 
 @admin.register(RecPrompt)
@@ -57,7 +64,7 @@ class ScriptAdmin(admin.ModelAdmin):
         )
 
 
-def current():
+def current_month():
     this_month = datetime.datetime.today().replace(day=1)
     return this_month.combine(this_month, datetime.time())
 
@@ -66,11 +73,46 @@ def current():
 class ProjectAdmin(admin.ModelAdmin):
     model = Project
 
+    def download(self, *args, **kwargs):
+        project = Project.objects.get(pk=kwargs.get("pk"))
+
+        project_view = ProjectsViewSet.as_view({"get": "retrieve"})
+        speaker_view = SpeakersViewSet.as_view({"get": "retrieve"})
+        script_view = ScriptsViewSet.as_view({"get": "retrieve"})
+
+        project_xml = project_view(*args, **kwargs).render()
+        speaker_xml = speaker_view(*args, **{"pk": project.speaker.pk}).render()
+        script_xml = script_view(*args, **{"pk": project.script.pk}).render()
+        dtd_file = os.path.join(settings.STATIC_ROOT, "SpeechRecPrompts_4.dtd")
+
+        buffer = io.BytesIO()
+
+        with ZipFile(buffer, "w") as zf:
+            zf.writestr(f"{project}_project.prj", project_xml.content)
+            zf.writestr(f"{project.speaker.pk}_speakers.xml", speaker_xml.content)
+            zf.writestr(f"{project.script.pk}_script.xml", script_xml.content)
+            zf.write(dtd_file, arcname="SpeechRecPrompts_4.dtd")
+
+        response = HttpResponse(buffer.getvalue())
+        response["Content-Type"] = "application/x-zip-compressed"
+        response["Content-Disposition"] = f"attachment; filename={project}.zip"
+        return response
+
+    def get_urls(self, *args, **kwargs):
+        urls = super().get_urls(*args, **kwargs)
+        return [
+            path("download/<int:pk>/", self.download),
+        ] + urls
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return qs.select_related("speaker", "script").only(
             "session", "speaker__name", "script"
         )
+
+    def project_zip(self, obj):
+        if obj:
+            return format_html(f'<a href="download/{obj.pk}/">Download</a>')
 
     def booking(self, obj):
         if obj:
@@ -78,21 +120,21 @@ class ProjectAdmin(admin.ModelAdmin):
 
     booking.admin_order_field = "session__startswith"
 
-    list_display = ("booking", "speaker", "script", "no_show")
+    raw_id_fields = ("script", "speaker")
+    search_fields = ("speaker__name", "speaker__email")
+    list_display = ("booking", "speaker", "script", "project_zip", "no_show")
     list_filter = (
         UpcomingFilter,
         (
             "session",
             DateTimeTZRangeFilterBuilder(
                 title="Session",
-                default_start=current(),
-                default_end=current() + relativedelta(months=1),
+                default_start=current_month(),
+                default_end=current_month() + relativedelta(months=1),
             ),
         ),
         "no_show",
     )
-    search_fields = ("speaker__name", "speaker__email")
-    raw_id_fields = ("script", "speaker")
 
 
 @admin.register(Speaker)
