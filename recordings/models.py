@@ -105,15 +105,18 @@ def upload_path(instance, filename):
     return f"{date.strftime('%Y/%m/%d/PROJECT_ID_')}{instance.id}/{filename}"
 
 
-class ProjectQuerySet(models.QuerySet):
+class FileModelQuerySet(models.QuerySet):
     """
     Remove the file from S3 storage
     """
 
     def delete(self, *args, **kwargs):
         for obj in self:
-            obj.release_form.delete()
-        super(ProjectQuerySet, self).delete(*args, **kwargs)
+            for field in obj._meta.fields:
+                if field.__class__ == CustomFileField:
+                    getattr(obj, field.name).delete()
+
+        super(FileModelQuerySet, self).delete(*args, **kwargs)
 
 
 class Project(models.Model):
@@ -139,7 +142,7 @@ class Project(models.Model):
         blank=True,
     )
 
-    objects = ProjectQuerySet.as_manager()
+    objects = FileModelQuerySet.as_manager()
 
     class Meta:
         ordering = ("session__startswith",)
@@ -179,17 +182,6 @@ class Script(models.Model):
         return f"script_{self.pk}"
 
 
-class RecPromptQuerySet(models.QuerySet):
-    """
-    Remove the file from S3 storage
-    """
-
-    def delete(self, *args, **kwargs):
-        for obj in self:
-            obj.recording.delete()
-        super(RecPromptQuerySet, self).delete(*args, **kwargs)
-
-
 class RecPrompt(models.Model):
     script = models.ForeignKey(
         Script,
@@ -209,7 +201,7 @@ class RecPrompt(models.Model):
         blank=True,
     )
 
-    objects = RecPromptQuerySet.as_manager()
+    objects = FileModelQuerySet.as_manager()
 
     def delete(self, *args, **kwargs):
         if self.recording:
@@ -218,3 +210,20 @@ class RecPrompt(models.Model):
 
     def __str__(self):
         return self.mediaitem
+
+
+class Microphone(models.Model):
+    model = models.CharField(max_length=128)
+    manual = CustomFileField(
+        upload_to="documentation/manuals", validators=[FileExtensionValidator(["pdf"])]
+    )
+
+    objects = FileModelQuerySet.as_manager()
+
+    def delete(self, *args, **kwargs):
+        if self.manual:
+            self.manual.delete()
+        super(Microphone, self).delete(*args, **kwargs)
+
+    def __str__(self):
+        return self.model

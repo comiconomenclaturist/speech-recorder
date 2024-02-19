@@ -175,3 +175,4 @@ class PlaybackMixerNameAdmin(MixerNameAdmin):
 
 admin.site.register(RecordingConfig)
 admin.site.register(Format)
+admin.site.register(Microphone)
