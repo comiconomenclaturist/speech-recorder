@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_xml",
     "rest_framework.authtoken",
+    "django_celery_beat",
+    "django_celery_results",
     "recordings",
 ]
 
@@ -151,6 +153,12 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ],
 }
+
+# Celery
+CELERY_RESULT_BACKEND = "django-db"
+CELERY_RESULT_EXTENDED = True
+# CELERY_RESULT_EXPIRES = 432000  # 5 days
+CELERY_BROKER_URL = env("CELERY_BROKER_REDIS_URL")
 
 if not DEBUG:
     ROLLBAR = {
