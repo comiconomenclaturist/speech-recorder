@@ -121,6 +121,7 @@ class ProjectAdmin(admin.ModelAdmin):
     booking.admin_order_field = "session__startswith"
 
     raw_id_fields = ("script", "speaker")
+    readonly_fields = ("archive",)
     search_fields = ("speaker__name", "speaker__email")
     list_display = ("booking", "speaker", "script", "project_zip", "no_show")
     list_filter = (

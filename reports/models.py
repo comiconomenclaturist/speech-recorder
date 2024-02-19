@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import FileExtensionValidator
 from recordings.fields import CustomFileField
+import os
 
 
 class Description(models.Model):
@@ -14,13 +15,11 @@ class Description(models.Model):
 
 class Archive(models.Model):
     description = models.ForeignKey(Description, on_delete=models.PROTECT)
-    archive = CustomFileField(
+    file = CustomFileField(
         upload_to="archived", validators=[FileExtensionValidator(["zip"])], null=False
     )
 
     def __str__(self):
-        if self.projects:
-            start = self.projects.first().session.lower
-            end = self.projects.last().session.upper
-            return f"{start} - {end}"
+        if self.file:
+            return os.path.basename(self.file.name)
         return super().__str__()

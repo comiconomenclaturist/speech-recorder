@@ -3,6 +3,7 @@ from psycopg2.extras import DateTimeTZRange
 from recordings.models import Project
 from celery import shared_task
 from zipfile import ZipFile
+from reports.models import *
 import tempfile
 import os
 
@@ -14,7 +15,9 @@ def write_line(file, text):
 @shared_task(name="Create archive")
 def create_archive(start, end):
     date_range = DateTimeTZRange(start, end)
-    projects = Project.objects.filter(session__contained_by=date_range)
+    projects = Project.objects.filter(
+        session__contained_by=date_range, script__recprompts__recording__isnull=False
+    )
 
     with tempfile.NamedTemporaryFile(suffix="zip") as tmp:
         with ZipFile(tmp, "w") as zf:
@@ -45,6 +48,26 @@ def create_archive(start, end):
                     filepath = os.path.join(speaker, filename)
                     zf.writestr(filepath, prompt.recording.file.open().read())
 
-        default_storage.save(
-            f"ARCHIVE/{projects.first().session.lower.strftime('%Y/%B_%Y.zip')}", tmp
+            description = Description.objects.first()
+
+            with zf.open(f"DOC/{description.name}.TXT", "w") as file:
+                write_line(file, f"{description.name}\n")
+                write_line(file, "Location:\n")
+                write_line(file, f"{description.location}\n")
+                write_line(file, "Equipment:\n")
+                write_line(file, f"{description.equipment}\n")
+                write_line(file, "Date range:\n")
+                write_line(
+                    file,
+                    f"{projects.first().session.lower} to {projects.last().session.upper}",
+                )
+
+        archive_name = (
+            f"ARCHIVE/{start.strftime('%Y/Resonance Speech Database %B %Y.zip')}"
         )
+        default_storage.save(archive_name, tmp)
+
+        archive = Archive.objects.create(
+            description=Description.objects.first(), file=archive_name
+        )
+        projects.update(archive=archive)

@@ -143,7 +143,9 @@ class Project(models.Model):
     )
     microphone = models.ForeignKey("recordings.Microphone", on_delete=models.PROTECT)
     soundcard = models.ForeignKey("recordings.Soundcard", on_delete=models.PROTECT)
-    archive = models.ForeignKey("reports.Archive", on_delete=models.PROTECT, null=True)
+    archive = models.ForeignKey(
+        "reports.Archive", related_name="projects", on_delete=models.PROTECT, null=True
+    )
 
     objects = FileModelQuerySet.as_manager()
 
