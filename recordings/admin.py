@@ -88,14 +88,14 @@ class ProjectAdmin(admin.ModelAdmin):
         buffer = io.BytesIO()
 
         with ZipFile(buffer, "w") as zf:
-            zf.writestr(f"{project}_project.prj", project_xml.content)
+            zf.writestr(f"{project.name}_project.prj", project_xml.content)
             zf.writestr(f"{project.speaker.pk}_speakers.xml", speaker_xml.content)
             zf.writestr(f"{project.script.pk}_script.xml", script_xml.content)
             zf.write(dtd_file, arcname="SpeechRecPrompts_4.dtd")
 
         response = HttpResponse(buffer.getvalue())
         response["Content-Type"] = "application/x-zip-compressed"
-        response["Content-Disposition"] = f"attachment; filename={project}.zip"
+        response["Content-Disposition"] = f"attachment; filename={project.name}.zip"
         return response
 
     def get_urls(self, *args, **kwargs):

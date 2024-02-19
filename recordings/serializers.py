@@ -23,7 +23,6 @@ class RecordingConfigSerializer(serializers.ModelSerializer):
 
 
 class ProjectSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source="__str__")
     recordingMixerName = serializers.SerializerMethodField()
     playbackMixerName = serializers.SerializerMethodField()
     RecordingConfiguration = RecordingConfigSerializer()

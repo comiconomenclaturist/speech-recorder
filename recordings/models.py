@@ -158,6 +158,10 @@ class Project(models.Model):
             self.release_form.delete()
         super(Project, self).delete(*args, **kwargs)
 
+    @property
+    def name(self):
+        return self.__str__().replace(":", "-")
+
     def __str__(self):
         if self.session and self.speaker:
             return f"{self.session.lower.strftime('%Y-%m-%d %H:%M')} - {self.speaker}"
