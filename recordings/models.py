@@ -228,3 +228,20 @@ class Microphone(models.Model):
 
     def __str__(self):
         return self.model
+
+
+class Soundcard(models.Model):
+    model = models.CharField(max_length=128)
+    manual = CustomFileField(
+        upload_to="documentation/manuals", validators=[FileExtensionValidator(["pdf"])]
+    )
+
+    objects = FileModelQuerySet.as_manager()
+
+    def delete(self, *args, **kwargs):
+        if self.manual:
+            self.manual.delete()
+        super(Microphone, self).delete(*args, **kwargs)
+
+    def __str__(self):
+        return self.model
