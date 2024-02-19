@@ -205,8 +205,14 @@ class RecPrompt(models.Model):
         null=True,
         blank=True,
     )
+    filesize = models.PositiveIntegerField(null=True)
 
     objects = FileModelQuerySet.as_manager()
+
+    def save(self, *args, **kwargs):
+        if self.recording:
+            self.filesize = self.recording.size
+        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         if self.recording:
