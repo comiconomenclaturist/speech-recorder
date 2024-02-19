@@ -21,7 +21,6 @@ def create_archive(start, end):
 
     with tempfile.NamedTemporaryFile(suffix="zip") as tmp:
         with ZipFile(tmp, "w") as zf:
-            zf.mkdir("DOC")
 
             with zf.open("TABLE/SPEAKER.TXT", "w") as file:
                 write_line(file, "SCD\tSEX\tAGE\tACC")
