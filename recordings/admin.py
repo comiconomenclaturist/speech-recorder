@@ -136,6 +136,11 @@ class ProjectAdmin(admin.ModelAdmin):
         "no_show",
     )
 
+    def save_model(self, request, obj, form, change):
+        if obj.no_show and obj.script:
+            obj.script = None
+        return super().save_model(request, obj, form, change)
+
 
 @admin.register(Speaker)
 class SpeakerAdmin(admin.ModelAdmin):

@@ -2,8 +2,6 @@ from django.db import models
 from django.contrib.postgres.fields import DateTimeRangeField, RangeOperators
 from django.contrib.postgres.constraints import ExclusionConstraint
 from django.core.validators import FileExtensionValidator
-from django.db.models.signals import post_delete
-from django.dispatch.dispatcher import receiver
 from .fields import CustomFileField
 import uuid
 import os
@@ -107,6 +105,17 @@ def upload_path(instance, filename):
     return f"{date.strftime('%Y/%m/%d/PROJECT_ID_')}{instance.id}/{filename}"
 
 
+class ProjectQuerySet(models.QuerySet):
+    """
+    Remove the file from S3 storage
+    """
+
+    def delete(self, *args, **kwargs):
+        for obj in self:
+            obj.release_form.delete()
+        super(ProjectQuerySet, self).delete(*args, **kwargs)
+
+
 class Project(models.Model):
     session = DateTimeRangeField()
     speaker = models.OneToOneField(Speaker, on_delete=models.PROTECT)
@@ -130,6 +139,8 @@ class Project(models.Model):
         blank=True,
     )
 
+    objects = ProjectQuerySet.as_manager()
+
     class Meta:
         ordering = ("session__startswith",)
         constraints = [
@@ -141,6 +152,11 @@ class Project(models.Model):
 
     def get_absolute_url(self):
         return f"/api/projects/{self.pk}/"
+
+    def delete(self, *args, **kwargs):
+        if self.release_form:
+            self.release_form.delete()
+        super(Project, self).delete(*args, **kwargs)
 
     def __str__(self):
         if self.session and self.speaker:
@@ -157,6 +173,17 @@ class Script(models.Model):
 
     def __str__(self):
         return f"script_{self.pk}"
+
+
+class RecPromptQuerySet(models.QuerySet):
+    """
+    Remove the file from S3 storage
+    """
+
+    def delete(self, *args, **kwargs):
+        for obj in self:
+            obj.recording.delete()
+        super(RecPromptQuerySet, self).delete(*args, **kwargs)
 
 
 class RecPrompt(models.Model):
@@ -178,21 +205,12 @@ class RecPrompt(models.Model):
         blank=True,
     )
 
+    objects = RecPromptQuerySet.as_manager()
+
+    def delete(self, *args, **kwargs):
+        if self.recording:
+            self.recording.delete()
+        super(RecPrompt, self).delete(*args, **kwargs)
+
     def __str__(self):
         return self.mediaitem
-
-
-@receiver(post_delete, sender=RecPrompt)
-def delete_recording(sender, instance, **kwargs):
-    """
-    Delete the recording from storage if the RecPrompt is deleted
-    """
-    instance.recording.delete(False)
-
-
-@receiver(post_delete, sender=Project)
-def delete_release_form(sender, instance, **kwargs):
-    """
-    Delete the release form from storage if the Project is deleted
-    """
-    instance.release_form.delete(False)
