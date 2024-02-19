@@ -96,6 +96,7 @@ class CreateProjectView(generics.CreateAPIView):
                 default=True
             ).first()
             project.script = Script.objects.filter(project__isnull=True).first()
+            project.microphone = Microphone.objects.first()
             project.save()
 
         return Response({}, status=200)

@@ -141,6 +141,7 @@ class Project(models.Model):
         null=True,
         blank=True,
     )
+    microphone = models.ForeignKey("recordings.Microphone", on_delete=models.PROTECT)
 
     objects = FileModelQuerySet.as_manager()
 
