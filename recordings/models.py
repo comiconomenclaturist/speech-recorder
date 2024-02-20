@@ -205,7 +205,7 @@ class RecPrompt(models.Model):
         null=True,
         blank=True,
     )
-    filesize = models.PositiveIntegerField(null=True)
+    filesize = models.PositiveIntegerField(null=True, blank=True)
 
     objects = FileModelQuerySet.as_manager()
 
