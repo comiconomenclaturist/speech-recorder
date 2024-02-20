@@ -8,6 +8,7 @@ from zipfile import ZipFile
 from .models import *
 from .views import ProjectsViewSet, SpeakersViewSet, ScriptsViewSet
 from .filters import *
+from .forms import RecPromptAdminForm
 from speech_recording import settings
 import datetime
 import io
@@ -31,6 +32,7 @@ class RecPromptAdmin(admin.ModelAdmin):
 
 class RecPromptInline(admin.TabularInline):
     model = RecPrompt
+    form = RecPromptAdminForm
 
 
 @admin.register(Script)
