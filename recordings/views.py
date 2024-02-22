@@ -138,9 +138,16 @@ class CalendlyWebhookView(generics.CreateAPIView):
                     project.speaker.delete()
 
             elif event == "invitee_no_show.created":
-                project.no_show = True
-                if not project.script.recprompts.filter(recording__isnull=False):
-                    project.script = None
+                if project.script:
+                    if not project.script.recprompts.filter(recording__isnull=False):
+                        project.no_show = True
+                        project.script = None
+                    else:
+                        raise Exception(
+                            "Can't mark a project as no_show if there are recordings"
+                        )
+                else:
+                    project.no_show = True
                 project.save()
 
         return Response({}, status=200)
