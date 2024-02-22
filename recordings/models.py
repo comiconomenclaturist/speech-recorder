@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import Q
+from django.db.models.constraints import UniqueConstraint
 from django.contrib.postgres.fields import DateTimeRangeField, RangeOperators
 from django.contrib.postgres.constraints import ExclusionConstraint
 from django.core.validators import FileExtensionValidator
@@ -54,7 +56,15 @@ class Format(models.Model):
         return f"{self.sampleRate} Hz / {self.sampleSizeInBits} bit"
 
 
-class RecordingConfig(models.Model):
+class GetDefaultMixin:
+    @classmethod
+    def get_default_pk(cls):
+        obj = cls.objects.filter(default=True).first()
+        if obj:
+            return obj.pk
+
+
+class RecordingConfig(models.Model, GetDefaultMixin):
     CAPTURE_SCOPE_CHOICES = (("S", "SESSION"), ("I", "ITEM"))
 
     url = models.CharField(max_length=64, default="RECS/")
@@ -62,12 +72,22 @@ class RecordingConfig(models.Model):
     captureScope = models.CharField(
         max_length=1, choices=CAPTURE_SCOPE_CHOICES, default="S"
     )
+    default = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["default"],
+                condition=Q(default=True),
+                name="unique_%(class)s_default",
+            )
+        ]
 
     def __str__(self):
         return f"{self.url} - {self.Format}"
 
 
-class MixerName(models.Model):
+class MixerName(models.Model, GetDefaultMixin):
     name = models.CharField(max_length=64)
     providerId = models.CharField(max_length=128)
     default = models.BooleanField(default=False)
@@ -94,17 +114,6 @@ class PlaybackMixerName(MixerName):
     pass
 
 
-def upload_path(instance, filename):
-    if isinstance(instance, Project):
-        filename, extension = os.path.splitext(filename)
-        filename = f"{instance.speaker.name} release form{extension}"
-    else:
-        instance = instance.script.project
-
-    date = instance.session.lower
-    return f"{date.strftime('%Y/%m/%d/PROJECT_ID_')}{instance.id}/{filename}"
-
-
 class FileModelQuerySet(models.QuerySet):
     """
     Remove the file from S3 storage
@@ -119,6 +128,53 @@ class FileModelQuerySet(models.QuerySet):
         super(FileModelQuerySet, self).delete(*args, **kwargs)
 
 
+class Equipment(models.Model, GetDefaultMixin):
+    model = models.CharField(max_length=128)
+    manual = CustomFileField(
+        upload_to="documentation/manuals", validators=[FileExtensionValidator(["pdf"])]
+    )
+    default = models.BooleanField(default=False)
+
+    objects = FileModelQuerySet.as_manager()
+
+    def delete(self, *args, **kwargs):
+        if self.manual:
+            self.manual.delete()
+        super(Microphone, self).delete(*args, **kwargs)
+
+    def __str__(self):
+        return self.model
+
+    class Meta:
+        abstract = True
+        constraints = [
+            UniqueConstraint(
+                fields=["default"],
+                condition=Q(default=True),
+                name="unique_%(class)s_default",
+            )
+        ]
+
+
+class Microphone(Equipment):
+    pass
+
+
+class Soundcard(Equipment):
+    pass
+
+
+def upload_path(instance, filename):
+    if isinstance(instance, Project):
+        filename, extension = os.path.splitext(filename)
+        filename = f"{instance.speaker.name} release form{extension}"
+    else:
+        instance = instance.script.project
+
+    date = instance.session.lower
+    return f"{date.strftime('%Y/%m/%d/PROJECT_ID_')}{instance.id}/{filename}"
+
+
 class Project(models.Model):
     session = DateTimeRangeField()
     speaker = models.OneToOneField(Speaker, on_delete=models.PROTECT)
@@ -126,13 +182,19 @@ class Project(models.Model):
         "recordings.Script", null=True, on_delete=models.PROTECT
     )
     RecordingConfiguration = models.ForeignKey(
-        RecordingConfig, null=True, on_delete=models.PROTECT
+        RecordingConfig,
+        default=RecordingConfig.get_default_pk,
+        on_delete=models.PROTECT,
     )
     recordingMixerName = models.ForeignKey(
-        RecordingMixerName, null=True, on_delete=models.PROTECT
+        RecordingMixerName,
+        default=RecordingMixerName.get_default_pk,
+        on_delete=models.PROTECT,
     )
     playbackMixerName = models.ForeignKey(
-        PlaybackMixerName, null=True, on_delete=models.PROTECT
+        PlaybackMixerName,
+        default=PlaybackMixerName.get_default_pk,
+        on_delete=models.PROTECT,
     )
     no_show = models.BooleanField(default=False)
     release_form = CustomFileField(
@@ -141,8 +203,16 @@ class Project(models.Model):
         null=True,
         blank=True,
     )
-    microphone = models.ForeignKey("recordings.Microphone", on_delete=models.PROTECT)
-    soundcard = models.ForeignKey("recordings.Soundcard", on_delete=models.PROTECT)
+    microphone = models.ForeignKey(
+        Microphone,
+        default=Microphone.get_default_pk,
+        on_delete=models.PROTECT,
+    )
+    soundcard = models.ForeignKey(
+        Soundcard,
+        default=Soundcard.get_default_pk,
+        on_delete=models.PROTECT,
+    )
     archive = models.ForeignKey(
         "reports.Archive", related_name="projects", on_delete=models.PROTECT, null=True
     )
@@ -221,37 +291,3 @@ class RecPrompt(models.Model):
 
     def __str__(self):
         return self.mediaitem
-
-
-class Microphone(models.Model):
-    model = models.CharField(max_length=128)
-    manual = CustomFileField(
-        upload_to="documentation/manuals", validators=[FileExtensionValidator(["pdf"])]
-    )
-
-    objects = FileModelQuerySet.as_manager()
-
-    def delete(self, *args, **kwargs):
-        if self.manual:
-            self.manual.delete()
-        super(Microphone, self).delete(*args, **kwargs)
-
-    def __str__(self):
-        return self.model
-
-
-class Soundcard(models.Model):
-    model = models.CharField(max_length=128)
-    manual = CustomFileField(
-        upload_to="documentation/manuals", validators=[FileExtensionValidator(["pdf"])]
-    )
-
-    objects = FileModelQuerySet.as_manager()
-
-    def delete(self, *args, **kwargs):
-        if self.manual:
-            self.manual.delete()
-        super(Microphone, self).delete(*args, **kwargs)
-
-    def __str__(self):
-        return self.model
