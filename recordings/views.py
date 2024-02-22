@@ -88,16 +88,7 @@ class CreateProjectView(generics.CreateAPIView):
 
             speaker.save()
             project.speaker = speaker
-            project.RecordingConfiguration = RecordingConfig.objects.first()
-            project.recordingMixerName = RecordingMixerName.objects.filter(
-                default=True
-            ).first()
-            project.playbackMixerName = PlaybackMixerName.objects.filter(
-                default=True
-            ).first()
             project.script = Script.objects.filter(project__isnull=True).first()
-            project.microphone = Microphone.objects.first()
-            project.soundcard = Soundcard.objects.first()
             project.save()
 
         return Response({}, status=200)
