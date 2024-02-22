@@ -7,8 +7,8 @@ from urllib.parse import urlparse
 from zipfile import ZipFile
 from .models import *
 from .views import ProjectsViewSet, SpeakersViewSet, ScriptsViewSet
+from .forms import RecPromptAdminForm, ProjectAdminForm
 from .filters import *
-from .forms import RecPromptAdminForm
 from speech_recording import settings
 import datetime
 import io
@@ -74,6 +74,7 @@ def current_month():
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
     model = Project
+    form = ProjectAdminForm
 
     def download(self, *args, **kwargs):
         project = Project.objects.get(pk=kwargs.get("pk"))
