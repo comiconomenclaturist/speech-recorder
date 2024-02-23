@@ -19,7 +19,7 @@ class RecordingConfigSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RecordingConfig
-        exclude = ("id",)
+        exclude = ("id", "default")
 
 
 class ProjectSerializer(serializers.ModelSerializer):
