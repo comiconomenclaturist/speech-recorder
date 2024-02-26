@@ -14,6 +14,24 @@ import datetime
 import io
 
 
+class ArchiveMixin:
+    def _check_project(self, obj, default):
+        if obj:
+            try:
+                if obj.project.script.recprompts.filter(recording__gt="").exists():
+                    return False
+            except:
+                return default
+
+    def has_change_permission(self, request, obj=None):
+        default = super().has_change_permission(request, obj)
+        return self._check_project(obj, default)
+
+    def has_delete_permission(self, request, obj=None):
+        default = super().has_delete_permission(request, obj)
+        return self._check_project(obj, default)
+
+
 @admin.register(RecPrompt)
 class RecPromptAdmin(admin.ModelAdmin):
     model = RecPrompt
@@ -36,9 +54,16 @@ class RecPromptInline(admin.TabularInline):
 
 
 @admin.register(Script)
-class ScriptAdmin(admin.ModelAdmin):
+class ScriptAdmin(ArchiveMixin, admin.ModelAdmin):
+    def recorded(self, obj=None):
+        if obj and obj.recprompts.filter(recording__gt=""):
+            return True
+        return False
+
+    recorded.boolean = True
+
     inlines = (RecPromptInline,)
-    list_display = ("__str__", "project")
+    list_display = ("__str__", "project", "recorded")
     search_fields = ("project__speaker__name", "project__speaker__email")
 
     def get_search_results(self, request, queryset, search_term):
@@ -123,6 +148,19 @@ class ProjectAdmin(admin.ModelAdmin):
 
     booking.admin_order_field = "session__startswith"
 
+    fields = (
+        "session",
+        "speaker",
+        "script",
+        "RecordingConfiguration",
+        "recordingMixerName",
+        "playbackMixerName",
+        "no_show",
+        "release_form",
+        "microphone",
+        "soundcard",
+        "archive",
+    )
     raw_id_fields = ("script", "speaker")
     readonly_fields = ("archive",)
     search_fields = ("speaker__name", "speaker__email")
@@ -140,6 +178,11 @@ class ProjectAdmin(admin.ModelAdmin):
         "no_show",
     )
 
+    def get_readonly_fields(self, request, obj=None):
+        if obj and obj.script and obj.script.recprompts.filter(recording__gt=""):
+            return [f for f in self.fields if f != "release_form"]
+        return super().get_readonly_fields(request, obj)
+
     def save_model(self, request, obj, form, change):
         if obj.no_show and obj.script:
             obj.script = None
@@ -147,7 +190,7 @@ class ProjectAdmin(admin.ModelAdmin):
 
 
 @admin.register(Speaker)
-class SpeakerAdmin(admin.ModelAdmin):
+class SpeakerAdmin(ArchiveMixin, admin.ModelAdmin):
     model = Speaker
     list_display = ("__str__", "sex", "email", "booking")
     list_filter = ("sex",)

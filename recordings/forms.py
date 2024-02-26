@@ -11,11 +11,13 @@ class ProjectAdminForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         script = cleaned_data.get("script")
+        changed_data = self.changed_data
 
-        if cleaned_data.get("no_show") and script:
-            if script.recprompts.filter(recording__isnull=False):
-                msg = "Can't mark a project as 'No show' if there are recordings"
-                self.add_error("no_show", msg)
+        if changed_data:
+            if not (len(changed_data) == 1 and changed_data[0] == "release_form"):
+                if script.recprompts.filter(recording__isnull=False):
+                    msg = "Can't change a project if there are recordings"
+                    self.add_error(self.changed_data[0], msg)
 
         return cleaned_data
 
