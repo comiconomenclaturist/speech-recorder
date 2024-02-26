@@ -98,9 +98,14 @@ class RecPromptSerializer(serializers.ModelSerializer):
 
 
 class RecordingSerializer(serializers.ModelSerializer):
+    recording = serializers.SerializerMethodField()
+
+    def get_recording(self, obj):
+        return os.path.basename(obj.recording.name)
+
     class Meta:
         model = RecPrompt
-        fields = "__all__"
+        fields = ("id", "mediaitem", "recording", "script")
 
 
 class ScriptSerializer(serializers.ModelSerializer):

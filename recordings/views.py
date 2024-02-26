@@ -155,3 +155,9 @@ class RecPromptView(
     parser_classes = (MultiPartParser,)
     search_fields = ["mediaitem"]
     filter_backends = (filters.SearchFilter,)
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.request.query_params.get("script"):
+            qs = qs.filter(script=self.request.query_params.get("script"))
+        return qs
