@@ -22,7 +22,10 @@ def create_archive(start, end):
 
     archive_name = f"ARCHIVE/{projects.first().session.lower.strftime('%Y/Resonance Speech Database %B %Y.zip')}"
 
-    if not default_storage.exists(archive_name):
+    try:
+        default_storage.exists(archive_name)
+    except FileNotFoundError:
+
         with tempfile.NamedTemporaryFile(suffix=".zip") as tmp:
             with ZipFile(tmp, "w", allowZip64=True) as zf:
                 with zf.open("TABLE/SPEAKER.TXT", "w") as file:
