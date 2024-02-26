@@ -4,7 +4,6 @@ from recordings.models import Project
 from celery import shared_task
 from zipfile import ZipFile
 from reports.models import *
-import tempfile
 import os
 
 
@@ -14,14 +13,15 @@ def write_line(file, text):
 
 @shared_task(name="Create archive")
 def create_archive(start, end):
-    date_range = DateTimeTZRange(start, end)
     projects = Project.objects.filter(
-        session__contained_by=date_range, script__recprompts__recording__isnull=False
-    )
+        session__contained_by=DateTimeTZRange(start, end),
+        script__recprompts__recording__isnull=False,
+    ).distinct()
 
-    with tempfile.NamedTemporaryFile(suffix="zip") as tmp:
+    archive_name = f"ARCHIVE/{projects.first().session.lower.strftime('%Y/Resonance Speech Database %B %Y.zip')}"
+
+    with default_storage.open(archive_name, "w") as tmp:
         with ZipFile(tmp, "w") as zf:
-
             with zf.open("TABLE/SPEAKER.TXT", "w") as file:
                 write_line(file, "SCD\tSEX\tAGE\tACC")
 
@@ -60,11 +60,6 @@ def create_archive(start, end):
                     file,
                     f"{projects.first().session.lower} to {projects.last().session.upper}",
                 )
-
-        archive_name = (
-            f"ARCHIVE/{start.strftime('%Y/Resonance Speech Database %B %Y.zip')}"
-        )
-        default_storage.save(archive_name, tmp)
 
         archive = Archive.objects.create(
             description=Description.objects.first(), file=archive_name
