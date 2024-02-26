@@ -101,7 +101,8 @@ class RecordingSerializer(serializers.ModelSerializer):
     recording = serializers.SerializerMethodField()
 
     def get_recording(self, obj):
-        return os.path.basename(obj.recording.name)
+        if obj.recording:
+            return os.path.basename(obj.recording.name)
 
     class Meta:
         model = RecPrompt
