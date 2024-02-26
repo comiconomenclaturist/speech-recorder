@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import FileExtensionValidator
 from recordings.fields import CustomFileField
+from recordings.models import FileModelQuerySet
 import os
 
 
@@ -19,7 +20,14 @@ class Archive(models.Model):
         upload_to="archived", validators=[FileExtensionValidator(["zip"])], null=False
     )
 
+    objects = FileModelQuerySet.as_manager()
+
     def __str__(self):
         if self.file:
             return os.path.basename(self.file.name)
         return super().__str__()
+
+    def delete(self, *args, **kwargs):
+        if self.file:
+            self.file.delete()
+        super(Archive, self).delete(*args, **kwargs)
