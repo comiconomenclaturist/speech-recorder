@@ -184,6 +184,7 @@ class ProjectAdmin(admin.ModelAdmin):
     readonly_fields = ("archive",)
     search_fields = ("speaker__name", "speaker__email")
     list_display = ("booking", "speaker", "script", "project_zip", "no_show")
+    ordering = ("-session__startswith",)
     list_filter = (
         UpcomingFilter,
         (
@@ -195,6 +196,7 @@ class ProjectAdmin(admin.ModelAdmin):
             ),
         ),
         "no_show",
+        "archive",
     )
 
     def get_readonly_fields(self, request, obj=None):
