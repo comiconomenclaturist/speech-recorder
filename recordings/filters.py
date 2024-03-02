@@ -2,6 +2,7 @@ from django.contrib import admin
 from rangefilter.filters import DateTimeRangeFilter
 from django.utils.translation import gettext_lazy as _
 from django.utils.timezone import now
+from django.db.models import Q
 from psycopg2.extras import DateTimeTZRange
 
 
@@ -72,3 +73,20 @@ def DateTimeTZRangeFilterBuilder(title=None, default_start=None, default_end=Non
     )
 
     return filter_cls
+
+
+class RecordedFilter(admin.SimpleListFilter):
+    title = _("Recorded")
+    parameter_name = "recorded"
+
+    def lookups(self, request, model_admin):
+        return [
+            ("true", _("Yes")),
+            ("false", _("No")),
+        ]
+
+    def queryset(self, request, queryset):
+        if self.value() == "true":
+            return queryset.filter(recording__gt="")
+        if self.value() == "false":
+            return queryset.filter(Q(recording__isnull=True) | Q(recording=""))

@@ -4,6 +4,7 @@ from django.db.models.constraints import UniqueConstraint
 from django.contrib.postgres.fields import DateTimeRangeField, RangeOperators
 from django.contrib.postgres.constraints import ExclusionConstraint
 from django.core.validators import FileExtensionValidator
+from django.template.defaultfilters import filesizeformat
 from .fields import CustomFileField
 import uuid
 import os
@@ -275,9 +276,15 @@ class RecPrompt(models.Model):
         null=True,
         blank=True,
     )
-    filesize = models.PositiveIntegerField(null=True, blank=True)
+    filesize = models.PositiveIntegerField(null=True, blank=True, editable=False)
 
     objects = FileModelQuerySet.as_manager()
+
+    @property
+    def size(self):
+        if self.filesize:
+            return filesizeformat(self.filesize)
+        return ""
 
     def save(self, *args, **kwargs):
         if self.recording:

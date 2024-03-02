@@ -17,11 +17,14 @@ import io
 class ArchiveMixin:
     def _check_project(self, obj, default):
         if obj:
+            if obj.__class__ == RecPrompt and obj.recording:
+                return False
             try:
                 if obj.project.script.recprompts.filter(recording__gt="").exists():
                     return False
             except:
-                return default
+                pass
+        return default
 
     def has_change_permission(self, request, obj=None):
         default = super().has_change_permission(request, obj)
@@ -33,15 +36,21 @@ class ArchiveMixin:
 
 
 @admin.register(RecPrompt)
-class RecPromptAdmin(admin.ModelAdmin):
+class RecPromptAdmin(ArchiveMixin, admin.ModelAdmin):
     model = RecPrompt
     list_display = ("__str__", "script", "project")
-    list_filter = (ProjectFilter,)
+    list_filter = (ProjectFilter, RecordedFilter)
     search_fields = ("mediaitem",)
+    readonly_fields = ("size",)
 
     def project(self, obj):
         if obj.script and obj.script.project:
             return obj.script.project
+
+    def size(self, obj):
+        return obj.size
+
+    size.short_description = "Filesize"
 
     def get_queryset(self, *args, **kwargs):
         qs = super().get_queryset(*args, **kwargs)
@@ -49,8 +58,14 @@ class RecPromptAdmin(admin.ModelAdmin):
 
 
 class RecPromptInline(admin.TabularInline):
+    def size(self, obj):
+        return obj.size
+
+    size.short_description = "Filesize"
+
     model = RecPrompt
     form = RecPromptAdminForm
+    readonly_fields = ("size",)
 
 
 @admin.register(Script)
