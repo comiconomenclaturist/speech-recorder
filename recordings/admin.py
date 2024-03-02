@@ -35,37 +35,41 @@ class ArchiveMixin:
         return self._check_project(obj, default)
 
 
+class RecordingMixin:
+    def _filesize(self, obj):
+        return obj._filesize
+
+    _filesize.short_description = "Filesize"
+
+    def _recording(self, obj):
+        return obj._recording
+
+    _recording.short_description = "Recording"
+
+
 @admin.register(RecPrompt)
-class RecPromptAdmin(ArchiveMixin, admin.ModelAdmin):
+class RecPromptAdmin(ArchiveMixin, RecordingMixin, admin.ModelAdmin):
     model = RecPrompt
     list_display = ("__str__", "script", "project")
     list_filter = (ProjectFilter, RecordedFilter)
     search_fields = ("mediaitem",)
-    readonly_fields = ("size",)
+    readonly_fields = ("_recording", "filesize")
+    exclude = ("recording",)
 
     def project(self, obj):
         if obj.script and obj.script.project:
             return obj.script.project
-
-    def size(self, obj):
-        return obj.size
-
-    size.short_description = "Filesize"
 
     def get_queryset(self, *args, **kwargs):
         qs = super().get_queryset(*args, **kwargs)
         return qs.select_related("script__project")
 
 
-class RecPromptInline(admin.TabularInline):
-    def size(self, obj):
-        return obj.size
-
-    size.short_description = "Filesize"
-
+class RecPromptInline(RecordingMixin, admin.TabularInline):
     model = RecPrompt
     form = RecPromptAdminForm
-    readonly_fields = ("size",)
+    readonly_fields = ("_recording", "_filesize")
+    exclude = ("recording",)
 
 
 @admin.register(Script)

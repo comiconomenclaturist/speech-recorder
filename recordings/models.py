@@ -5,6 +5,7 @@ from django.contrib.postgres.fields import DateTimeRangeField, RangeOperators
 from django.contrib.postgres.constraints import ExclusionConstraint
 from django.core.validators import FileExtensionValidator
 from django.template.defaultfilters import filesizeformat
+from django.utils.html import format_html
 from .fields import CustomFileField
 import uuid
 import os
@@ -281,7 +282,18 @@ class RecPrompt(models.Model):
     objects = FileModelQuerySet.as_manager()
 
     @property
-    def size(self):
+    def _recording(self):
+        if self and self.recording:
+            basename = os.path.basename(self.recording.name)
+            url = self.recording.url
+
+            return format_html(
+                f'<a href="{url}">{basename}</a></br><audio controls src="{url}"></audio>'
+            )
+        return ""
+
+    @property
+    def _filesize(self):
         if self.filesize:
             return filesizeformat(self.filesize)
         return ""
