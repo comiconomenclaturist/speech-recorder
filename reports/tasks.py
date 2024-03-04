@@ -71,9 +71,9 @@ def create_archive(start, end):
                 archive, created = Archive.objects.get_or_create(
                     description=Description.objects.first(), file=archive_name
                 )
-                projects.update(archive=archive)
+                updated = projects.update(archive=archive)
 
-                return f"{projects.count()} projects archived to {archive_name}"
+                return f"{updated} projects archived to {archive_name}"
 
         return "Archive with this name already exists"
 
