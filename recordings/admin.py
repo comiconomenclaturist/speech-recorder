@@ -284,6 +284,7 @@ class SpeakerAdmin(ArchiveMixin, admin.ModelAdmin):
     list_filter = (
         "sex",
         "project__no_show",
+        SpeakerRecordedFilter,
         (
             "project__session",
             DateTimeTZRangeFilterBuilder(
@@ -292,7 +293,6 @@ class SpeakerAdmin(ArchiveMixin, admin.ModelAdmin):
                 default_end=current_month() + relativedelta(months=1),
             ),
         ),
-        SpeakerRecordedFilter,
     )
     search_fields = ("name", "email")
     actions = ("export_to_CSV",)

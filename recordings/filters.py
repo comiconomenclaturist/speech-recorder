@@ -108,7 +108,6 @@ class SpeakerRecordedFilter(admin.SimpleListFilter):
                 project__script__recprompts__recording__gt=""
             ).distinct()
         if self.value() == "false":
-            return queryset.filter(
-                Q(project__script__recprompts__recording__isnull=True)
-                | Q(project__script__recprompts__recording="")
+            return queryset.exclude(
+                project__script__recprompts__recording__gt=""
             ).distinct()
