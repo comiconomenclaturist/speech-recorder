@@ -24,7 +24,7 @@ def create_archive(start, end):
         first = projects.first().session.lower
         last = projects.last().session.upper
 
-        archive_name = f"ARCHIVE/{first.year}/Resonance Speech Database {first.date()} - {last.date()}.zip')"
+        archive_name = f"ARCHIVE/{first.year}/Resonance Speech Database {first.date()} - {last.date()}.zip"
 
         if not default_storage.exists(archive_name):
             with tempfile.NamedTemporaryFile(suffix=".zip") as tmp:
