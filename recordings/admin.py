@@ -261,8 +261,14 @@ class ProjectAdmin(admin.ModelAdmin):
 
 @admin.register(Speaker)
 class SpeakerAdmin(ArchiveMixin, admin.ModelAdmin):
+    def no_show(self, obj):
+        if obj and obj.project:
+            return obj.project.no_show
+
+    no_show.boolean = True
+
     model = Speaker
-    list_display = ("__str__", "sex", "email", "booking")
+    list_display = ("__str__", "sex", "email", "booking", "no_show")
     list_filter = (
         "sex",
         "project__no_show",
