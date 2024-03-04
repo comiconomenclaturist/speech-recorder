@@ -285,10 +285,12 @@ class SpeakerAdmin(ArchiveMixin, admin.ModelAdmin):
             f"attachment; filename=Speech Recording {self.model._meta.model_name}.csv"
         )
         writer = csv.writer(response)
-        writer.writerow(["name", "email", "booking"])
+        writer.writerow(["name", "email", "booking", "no_show"])
 
         for obj in queryset:
-            writer.writerow([obj.name, obj.email, obj.project.session.lower])
+            writer.writerow(
+                [obj.name, obj.email, obj.project.session.lower, obj.project.no_show]
+            )
 
         return response
 
