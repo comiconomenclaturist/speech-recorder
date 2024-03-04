@@ -40,6 +40,13 @@ class Speaker(models.Model):
                 date.year - dob.year - ((date.month, date.day) < (dob.month, dob.day))
             )
 
+    @property
+    def recorded(self):
+        try:
+            return self.project.script.recprompts.filter(recording__gt="").exists()
+        except:
+            return False
+
     def get_absolute_url(self):
         return f"/api/speakers/{self.pk}/"
 

@@ -90,3 +90,25 @@ class RecordedFilter(admin.SimpleListFilter):
             return queryset.filter(recording__gt="")
         if self.value() == "false":
             return queryset.filter(Q(recording__isnull=True) | Q(recording=""))
+
+
+class SpeakerRecordedFilter(admin.SimpleListFilter):
+    title = _("Recorded")
+    parameter_name = "recorded"
+
+    def lookups(self, request, model_admin):
+        return [
+            ("true", _("Yes")),
+            ("false", _("No")),
+        ]
+
+    def queryset(self, request, queryset):
+        if self.value() == "true":
+            return queryset.filter(
+                project__script__recprompts__recording__gt=""
+            ).distinct()
+        if self.value() == "false":
+            return queryset.filter(
+                Q(project__script__recprompts__recording__isnull=True)
+                | Q(project__script__recprompts__recording="")
+            ).distinct()

@@ -261,14 +261,26 @@ class ProjectAdmin(admin.ModelAdmin):
 
 @admin.register(Speaker)
 class SpeakerAdmin(ArchiveMixin, admin.ModelAdmin):
+    def booking(self, obj):
+        if obj:
+            return obj.project.session.lower
+
+    booking.admin_order_field = "project__session__startswith"
+
     def no_show(self, obj):
         if obj and obj.project:
             return obj.project.no_show
 
     no_show.boolean = True
 
+    def recorded(self, obj):
+        if obj:
+            return obj.recorded
+
+    recorded.boolean = True
+
     model = Speaker
-    list_display = ("__str__", "sex", "email", "booking", "no_show")
+    list_display = ("__str__", "sex", "email", "booking", "no_show", "recorded")
     list_filter = (
         "sex",
         "project__no_show",
@@ -280,6 +292,7 @@ class SpeakerAdmin(ArchiveMixin, admin.ModelAdmin):
                 default_end=current_month() + relativedelta(months=1),
             ),
         ),
+        SpeakerRecordedFilter,
     )
     search_fields = ("name", "email")
     actions = ("export_to_CSV",)
@@ -291,18 +304,20 @@ class SpeakerAdmin(ArchiveMixin, admin.ModelAdmin):
             f"attachment; filename=Speech Recording {self.model._meta.model_name}.csv"
         )
         writer = csv.writer(response)
-        writer.writerow(["name", "email", "booking", "no_show"])
+        writer.writerow(["name", "email", "booking", "no_show", "recorded"])
 
         for obj in queryset:
             writer.writerow(
-                [obj.name, obj.email, obj.project.session.lower, obj.project.no_show]
+                [
+                    obj.name,
+                    obj.email,
+                    obj.project.session.lower,
+                    obj.project.no_show,
+                    obj.recorded,
+                ]
             )
 
         return response
-
-    def booking(self, obj):
-        if obj:
-            return obj.project.session.lower
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
