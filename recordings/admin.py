@@ -14,6 +14,7 @@ from speech_recording import settings
 from celery import current_app
 from .forms import ArchiveForm
 import datetime
+import csv
 import io
 
 
@@ -262,8 +263,34 @@ class ProjectAdmin(admin.ModelAdmin):
 class SpeakerAdmin(ArchiveMixin, admin.ModelAdmin):
     model = Speaker
     list_display = ("__str__", "sex", "email", "booking")
-    list_filter = ("sex",)
+    list_filter = (
+        "sex",
+        "project__no_show",
+        (
+            "project__session",
+            DateTimeTZRangeFilterBuilder(
+                title="Session",
+                default_start=current_month(),
+                default_end=current_month() + relativedelta(months=1),
+            ),
+        ),
+    )
     search_fields = ("name", "email")
+    actions = ("export_to_CSV",)
+
+    @admin.action
+    def export_to_CSV(self, request, queryset):
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = (
+            f"attachment; filename=Speech Recording {self.model._meta.model_name}.csv"
+        )
+        writer = csv.writer(response)
+        writer.writerow(["name", "email", "booking"])
+
+        for obj in queryset:
+            writer.writerow([obj.name, obj.email, obj.project.session.lower])
+
+        return response
 
     def booking(self, obj):
         if obj:
