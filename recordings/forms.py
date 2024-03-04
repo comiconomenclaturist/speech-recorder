@@ -1,6 +1,6 @@
 from django import forms
-from django.forms import widgets
-from .models import Project, RecPrompt
+from .models import Project
+from django.contrib.admin.widgets import AdminDateWidget
 
 
 class ProjectAdminForm(forms.ModelForm):
@@ -22,18 +22,11 @@ class ProjectAdminForm(forms.ModelForm):
         return cleaned_data
 
 
-class RecordingWidget(widgets.ClearableFileInput):
-    def render(self, name, value, attrs=None, renderer=None):
-        html = super().render(name, value, attrs, renderer)
-        if value:
-            html += f'<p><audio controls src="{value.url}"></audio></p>'
-        return html
+class ArchiveForm(forms.Form):
+    start = forms.DateField(widget=AdminDateWidget)
+    end = forms.DateField(widget=AdminDateWidget)
 
-
-class RecPromptAdminForm(forms.ModelForm):
-    class Meta:
-        model = RecPrompt
-        fields = "__all__"
-        widgets = {
-            "recording": RecordingWidget(),
-        }
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get("start") >= cleaned_data.get("end"):
+            self.add_error("start", "Start date must be less than end date")

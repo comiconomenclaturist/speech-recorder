@@ -1,15 +1,18 @@
 from django.contrib import admin
 from dateutil.relativedelta import relativedelta
 from django.utils.html import format_html
-from django.urls import path
-from django.http import HttpResponse
+from django.urls import path, reverse
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
 from urllib.parse import urlparse
 from zipfile import ZipFile
 from .models import *
 from .views import ProjectsViewSet, SpeakersViewSet, ScriptsViewSet
-from .forms import RecPromptAdminForm, ProjectAdminForm
+from .forms import ProjectAdminForm
 from .filters import *
 from speech_recording import settings
+from celery import current_app
+from .forms import ArchiveForm
 import datetime
 import io
 
@@ -67,7 +70,6 @@ class RecPromptAdmin(ArchiveMixin, RecordingMixin, admin.ModelAdmin):
 
 class RecPromptInline(RecordingMixin, admin.TabularInline):
     model = RecPrompt
-    form = RecPromptAdminForm
     readonly_fields = ("_recording", "_filesize")
     exclude = ("recording",)
 
@@ -119,6 +121,7 @@ def current_month():
 class ProjectAdmin(admin.ModelAdmin):
     model = Project
     form = ProjectAdminForm
+    change_list_template = "admin/recordings/project/change_list.html"
 
     def download(self, *args, **kwargs):
         project = Project.objects.get(pk=kwargs.get("pk"))
@@ -145,10 +148,55 @@ class ProjectAdmin(admin.ModelAdmin):
         response["Content-Disposition"] = f"attachment; filename={project.name}.zip"
         return response
 
+    def archive(self, request, *args, **kwargs):
+        context = {
+            "opts": self.model._meta,
+            "site_title": "Speech Recorder admin",
+            "title": "Projects",
+            "subtitle": "Create archive",
+            "form": ArchiveForm(),
+        }
+
+        if request.method == "POST":
+            form = ArchiveForm(data=request.POST)
+
+            if form.is_valid():
+                start = form.cleaned_data.get("start")
+                end = form.cleaned_data.get("end")
+
+                i = current_app.control.inspect()
+
+                for worker, tasks in i.active().items():
+                    for task in tasks:
+                        if task["name"] == "Create archive":
+                            self.message_user(
+                                request,
+                                "Create archive task is already running",
+                                level="ERROR",
+                            )
+                            return render(
+                                request,
+                                "admin/recordings/project/archive.html",
+                                context=context,
+                            )
+
+                current_app.send_task("Create archive", (start, end))
+                self.message_user(
+                    request, f"Creating an archive of projects from {start} to {end}..."
+                )
+                return HttpResponseRedirect(
+                    reverse("admin:recordings_project_changelist")
+                )
+            else:
+                context["form"] = form
+
+        return render(request, "admin/recordings/project/archive.html", context=context)
+
     def get_urls(self, *args, **kwargs):
         urls = super().get_urls(*args, **kwargs)
         return [
             path("download/<int:pk>/", self.download),
+            path("archive/", self.archive),
         ] + urls
 
     def get_queryset(self, request):

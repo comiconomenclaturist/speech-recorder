@@ -1,0 +1,26 @@
+{% extends "admin/change_form.html" %}
+{% load i18n static admin_modify %}
+
+{% block extrahead %}{{ block.super }}
+<script type="text/javascript" src="/jsi18n/"></script>
+<script src="{% static '/admin/js/core.js' %}"></script>
+<link rel="stylesheet" href="{% static 'admin/css/base.css' %}">
+<link rel="stylesheet" href="{% static 'admin/css/widgets.css' %}">
+{% endblock %}
+
+{% block content %}
+    <form action="" method="post">
+        {% csrf_token %}
+        <p>Select a date range to generate an archive from</p>
+        {% for field in form %}
+            {% if field.errors %}
+                {% for error in field.errors %}
+                    <p style="color: red">{{ error|escape }}</p>
+                {% endfor %}
+            {% endif %}
+            <p><span style="padding-right: 20px;">{{ field.label }}:</span>{{ field }}</p>
+        {% endfor %}
+        {{ form.media }}
+        <input type="submit" name="apply" value="Create archive"/>
+    </form>
+{% endblock %}
