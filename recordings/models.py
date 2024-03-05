@@ -305,6 +305,9 @@ class RecPrompt(models.Model):
             return filesizeformat(self.filesize)
         return ""
 
+    def get_absolute_url(self):
+        return f"/api/recordings/{self.pk}/"
+
     def save(self, *args, **kwargs):
         if self.recording:
             self.filesize = self.recording.size

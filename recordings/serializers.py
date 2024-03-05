@@ -102,6 +102,16 @@ class RecordingSerializer(serializers.ModelSerializer):
         model = RecPrompt
         fields = ("id", "mediaitem", "recording", "script")
 
+    def validate_recording(self, value):
+        """
+        Check that the project that this recording belongs to is not already archived.
+        """
+        if self.instance.script.project.archive:
+            raise serializers.ValidationError(
+                "This project has been archived and may not be amended"
+            )
+        return value
+
 
 class ScriptSerializer(serializers.ModelSerializer):
     script = serializers.SerializerMethodField()
