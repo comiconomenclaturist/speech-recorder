@@ -32,6 +32,8 @@ EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = True
 
+OTP_EMAIL_SENDER = EMAIL_HOST_USER
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -47,6 +49,12 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "django_celery_beat",
     "django_celery_results",
+    "django_otp",
+    "django_otp.plugins.otp_static",
+    "django_otp.plugins.otp_totp",
+    "django_otp.plugins.otp_email",
+    "two_factor",
+    "two_factor.plugins.email",
     "recordings",
     "reports",
 ]
@@ -60,6 +68,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "rollbar.contrib.django.middleware.RollbarNotifierMiddleware",
+    "django_otp.middleware.OTPMiddleware",
 ]
 
 ROOT_URLCONF = "speech_recording.urls"
@@ -67,7 +76,7 @@ ROOT_URLCONF = "speech_recording.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": ["templates/"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -142,6 +151,14 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# 2FA
+LOGIN_URL = "two_factor:login"
+LOGIN_REDIRECT_URL = "two_factor:profile"
+
+# OTP
+OTP_EMAIL_SUBJECT = "Speech Recorder authentication token"
+OTP_EMAIL_BODY_TEMPLATE_PATH = "two_factor/email_body.txt"
 
 REST_FRAMEWORK = {
     "DEFAULT_PARSER_CLASSES": ("rest_framework.parsers.JSONParser",),

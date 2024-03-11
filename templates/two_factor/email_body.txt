@@ -1,0 +1,5 @@
+Your token for logging in to the Speech Recorder admin is:
+
+{{ token }}
+
+This token is valid for 5 minutes
