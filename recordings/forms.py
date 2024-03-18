@@ -15,7 +15,7 @@ class ProjectAdminForm(forms.ModelForm):
 
         if changed_data:
             if not (len(changed_data) == 1 and changed_data[0] == "release_form"):
-                if script.recprompts.filter(recording__gt=""):
+                if script and script.recprompts.filter(recording__gt=""):
                     msg = "Can't change a project if there are recordings"
                     self.add_error(self.changed_data[0], msg)
 
