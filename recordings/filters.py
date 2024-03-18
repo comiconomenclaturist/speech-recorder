@@ -111,3 +111,29 @@ class SpeakerRecordedFilter(admin.SimpleListFilter):
             return queryset.exclude(
                 project__script__recprompts__recording__gt=""
             ).distinct()
+
+
+class StatusFilter(admin.SimpleListFilter):
+    title = _("Status")
+    parameter_name = "status"
+
+    def lookups(self, request, model_admin):
+        return [
+            (0, _("Available")),
+            (1, _("Assigned")),
+            (2, _("Used")),
+        ]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            if self.value() == "0":
+                return queryset.filter(project__isnull=True)
+            elif self.value() == "1":
+                return queryset.filter(project__isnull=False).exclude(
+                    recprompts__recording__gt=""
+                )
+            elif self.value() == "2":
+                return queryset.filter(
+                    project__isnull=False, recprompts__recording__gt=""
+                ).distinct()
+        return queryset
