@@ -78,7 +78,7 @@ class CreateProjectView(generics.CreateAPIView):
                     invitee = client.get_resource(answer["url"])
                     event = client.get_resource(invitee["resource"]["event"])
 
-                    speaker.name = invitee["resource"]["name"]
+                    speaker.name = " ".join(invitee["resource"]["name"].split())
                     speaker.email = invitee["resource"]["email"]
 
                     project.session = DateTimeTZRange(
