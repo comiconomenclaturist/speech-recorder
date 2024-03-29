@@ -159,5 +159,8 @@ class RecPromptView(
     def get_queryset(self):
         qs = super().get_queryset()
         if self.request.query_params.get("script"):
-            qs = qs.filter(script=self.request.query_params.get("script"))
+            try:
+                qs = qs.filter(script=self.request.query_params.get("script"))
+            except:
+                raise Http404
         return qs
