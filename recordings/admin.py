@@ -208,7 +208,7 @@ class ProjectAdmin(admin.ModelAdmin):
         )
 
     def project_zip(self, obj):
-        if obj:
+        if obj and obj.script:
             return format_html(f'<a href="download/{obj.pk}/">Download</a>')
 
     def booking(self, obj):
