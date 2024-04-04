@@ -7,6 +7,13 @@ class ProjectAdminForm(forms.ModelForm):
     class Meta:
         model = Project
         fields = "__all__"
+        widgets = {
+            "session": RangeWidget(
+                base_widget=forms.DateTimeInput(
+                    attrs={"placeholder": "YYYY-MM-DD HH:MM"}
+                )
+            )
+        }
 
     def clean(self):
         cleaned_data = super().clean()
