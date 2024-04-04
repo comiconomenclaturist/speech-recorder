@@ -1,6 +1,7 @@
 from django import forms
 from .models import Project
 from django.contrib.admin.widgets import AdminDateWidget
+from django.contrib.postgres.forms.ranges import RangeWidget
 
 
 class ProjectAdminForm(forms.ModelForm):
