@@ -63,12 +63,12 @@ class CreateProjectView(generics.CreateAPIView):
         speaker = Speaker()
 
         if data.get("event") == "invitee.created":
+            PRIVATE_ID = settings.env("CALENDLY_PRIVATE_BOOKING_ID")
             payload = data["payload"]
             event = payload["scheduled_event"]
 
             if not payload["rescheduled"]:
-                if event["name"] == "Speech Recording Session (Private)":
-
+                if event["event_type"].endswith(PRIVATE_ID):
                     for answer in payload["questions_and_answers"]:
                         if answer["question"] == "Gender":
                             speaker.sex = answer["answer"][0]
