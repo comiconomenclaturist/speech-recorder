@@ -45,8 +45,15 @@ class SpeakerForm(forms.ModelForm):
         model = Speaker
         fields = ("dateOfBirth", "name", "email", "sex", "accent")
         widgets = {
-            "dateOfBirth": forms.widgets.DateInput(attrs={"placeholder": "DD/MM/YYYY"})
+            "dateOfBirth": forms.widgets.DateInput(
+                attrs={"placeholder": "DD/MM/YYYY", "class": "form-control"}
+            ),
+            "name": forms.widgets.TextInput(attrs={"class": "form-control"}),
+            "email": forms.widgets.EmailInput(attrs={"class": "form-control"}),
+            "sex": forms.widgets.Select(attrs={"class": "form-control"}),
+            "accent": forms.widgets.Select(attrs={"class": "form-control"}),
         }
+        labels = {"sex": "Gender"}
 
 
 class BookingForm(forms.ModelForm):
