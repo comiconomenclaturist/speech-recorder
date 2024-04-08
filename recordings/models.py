@@ -186,7 +186,7 @@ def upload_path(instance, filename):
 
 class Project(models.Model):
     session = DateTimeRangeField()
-    private = models.BooleanField()
+    private = models.BooleanField(default=False)
     speaker = models.OneToOneField(Speaker, on_delete=models.PROTECT)
     script = models.OneToOneField(
         "recordings.Script", null=True, on_delete=models.PROTECT
