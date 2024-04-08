@@ -219,6 +219,7 @@ class ProjectAdmin(admin.ModelAdmin):
 
     fields = (
         "session",
+        "private",
         "speaker",
         "script",
         "RecordingConfiguration",
@@ -233,10 +234,11 @@ class ProjectAdmin(admin.ModelAdmin):
     raw_id_fields = ("script", "speaker")
     readonly_fields = ("archive",)
     search_fields = ("speaker__name", "speaker__email")
-    list_display = ("booking", "speaker", "script", "project_zip", "no_show")
+    list_display = ("booking", "speaker", "script", "project_zip", "no_show", "private")
     ordering = ("-session__startswith",)
     list_filter = (
         UpcomingFilter,
+        "private",
         (
             "session",
             DateTimeTZRangeFilterBuilder(
