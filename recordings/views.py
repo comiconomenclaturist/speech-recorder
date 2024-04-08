@@ -164,3 +164,10 @@ class RecPromptView(
             except:
                 raise Http404
         return qs
+
+
+from formtools.wizard.views import SessionWizardView
+
+
+class Home(SessionWizardView):
+    template_name = "home.html"

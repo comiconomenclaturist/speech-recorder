@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "two_factor.plugins.email",
     "recordings",
     "reports",
+    "bootstrap5",
 ]
 
 MIDDLEWARE = [

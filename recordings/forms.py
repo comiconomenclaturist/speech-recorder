@@ -1,7 +1,7 @@
 from django import forms
-from .models import Project
 from django.contrib.admin.widgets import AdminDateWidget
 from django.contrib.postgres.forms.ranges import RangeWidget
+from .models import Project, Speaker
 
 
 class ProjectAdminForm(forms.ModelForm):
@@ -38,3 +38,12 @@ class ArchiveForm(forms.Form):
         cleaned_data = super().clean()
         if cleaned_data.get("start") >= cleaned_data.get("end"):
             self.add_error("start", "Start date must be less than end date")
+
+
+class HomeForm(forms.ModelForm):
+    class Meta:
+        model = Speaker
+        fields = ("dateOfBirth", "name", "email", "sex", "accent")
+        widgets = {
+            "dateOfBirth": forms.widgets.DateInput(attrs={"placeholder": "DD/MM/YYYY"})
+        }

@@ -17,6 +17,33 @@ class Speaker(models.Model):
         ("F", "FEMALE"),
         ("O", "OTHER"),
     )
+    ACCENT_CHOICES = (
+        ("English (Northern)", "English (Northern)"),
+        ("English (East Midlands)", "English (East Midlands)"),
+        ("English (West Midlands)", "English (West Midlands)"),
+        ("English (East Anglian)", "English (East Anglian)"),
+        ("English (Southern)", "English (Southern)"),
+        ("English (West Country)", "English (West Country)"),
+        ("Glasgow", "Glasgow"),
+        ("Highland", "Highland"),
+        ("Welsh", "Welsh"),
+        ("Irish", "Irish"),
+        ("North American", "North American"),
+        ("South American", "South American"),
+        ("Central American", "Central American"),
+        ("Caribbean", "Caribbean"),
+        ("Central & South Asian", "Central & South Asian"),
+        ("Northeastern Asian", "Northeastern Asian"),
+        ("Southeastern Asian", "Southeastern Asian"),
+        ("Australian and Oceanian", "Australian and Oceanian"),
+        ("Northern European", "Northern European"),
+        ("Southern European", "Southern European"),
+        ("Eastern European", "Eastern European"),
+        ("Western European", "Western European"),
+        ("Middle Eastern", "Middle Eastern"),
+        ("Northern African", "Northern African"),
+        ("Southern African", "Southern African"),
+    )
     personId = models.BigAutoField(primary_key=True)
     dateOfBirth = models.DateField(verbose_name="Date of birth")
     name = models.CharField(max_length=64)
@@ -25,7 +52,9 @@ class Speaker(models.Model):
     sex = models.CharField(choices=SEX_CHOICES, max_length=1)
     uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     code = models.CharField(max_length=64, default="", blank=True)
-    accent = models.CharField(max_length=64, default="", blank=True)
+    accent = models.CharField(
+        max_length=64, default="", choices=ACCENT_CHOICES, blank=True
+    )
 
     @property
     def age(self):
