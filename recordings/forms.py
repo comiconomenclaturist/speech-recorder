@@ -40,10 +40,16 @@ class ArchiveForm(forms.Form):
             self.add_error("start", "Start date must be less than end date")
 
 
-class HomeForm(forms.ModelForm):
+class SpeakerForm(forms.ModelForm):
     class Meta:
         model = Speaker
         fields = ("dateOfBirth", "name", "email", "sex", "accent")
         widgets = {
             "dateOfBirth": forms.widgets.DateInput(attrs={"placeholder": "DD/MM/YYYY"})
         }
+
+
+class BookingForm(forms.ModelForm):
+    class Meta:
+        model = Project
+        fields = ("session",)

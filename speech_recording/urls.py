@@ -11,7 +11,7 @@ from rest_framework.routers import SimpleRouter
 from recordings.views import *
 from two_factor.urls import urlpatterns as tf_urls
 from two_factor.admin import AdminSiteOTPRequiredMixin, AdminSiteOTPRequired
-from recordings.forms import HomeForm
+from recordings.forms import SpeakerForm, BookingForm
 
 admin.site.site_header = "Speech Recorder admin"
 admin.site.site_title = "Speech Recorder admin"
@@ -55,7 +55,7 @@ admin.site.__class__ = AdminSiteOTPRequiredMixinRedirSetup
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", Home.as_view([HomeForm])),
+    path("", Home.as_view([SpeakerForm, BookingForm])),
     path("api/bookings/add/", CreateProjectView.as_view()),
     path("api/calendly/", CalendlyWebhookView.as_view()),
     path("", include(tf_urls)),
