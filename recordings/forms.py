@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.admin.widgets import AdminDateWidget
 from django.contrib.postgres.forms.ranges import RangeWidget
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from .models import Project, Speaker
 
 
@@ -46,7 +48,13 @@ class SpeakerForm(forms.ModelForm):
         fields = ("dateOfBirth", "name", "email", "sex", "accent")
         widgets = {
             "dateOfBirth": forms.widgets.DateInput(
-                attrs={"placeholder": "DD/MM/YYYY", "class": "form-control"}
+                attrs={
+                    "placeholder": "DD/MM/YYYY",
+                    "class": "form-control",
+                    "type": "date",
+                    "max": (datetime.now().date() - relativedelta(years=18)),
+                    "style": "text-transform: uppercase;",
+                }
             ),
             "name": forms.widgets.TextInput(attrs={"class": "form-control"}),
             "email": forms.widgets.EmailInput(attrs={"class": "form-control"}),
@@ -56,7 +64,21 @@ class SpeakerForm(forms.ModelForm):
         labels = {"sex": "Gender"}
 
 
-class BookingForm(forms.ModelForm):
-    class Meta:
-        model = Project
-        fields = ("session",)
+class BookingForm(forms.Form):
+    slot = forms.DateTimeField(
+        widget=forms.widgets.SplitDateTimeWidget(
+            date_attrs={"label": "date", "type": "date"},
+            time_attrs={"label": "time", "type": "time"},
+        )
+    )
+    # class Meta:
+    #     model = Project
+    #     fields = ("session",)
+    #     widgets = {
+    #         "session": RangeWidget(
+    #             forms.SplitDateTimeWidget(
+    #                 date_attrs={"type": "date"},
+    #                 time_attrs={"type": "time"},
+    #             ),
+    #         )
+    #     }
