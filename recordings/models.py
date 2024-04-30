@@ -4,6 +4,7 @@ from django.db.models.constraints import UniqueConstraint
 from django.contrib.postgres.fields import DateTimeRangeField, RangeOperators
 from django.contrib.postgres.constraints import ExclusionConstraint
 from django.core.validators import FileExtensionValidator
+from django.core.exceptions import ValidationError
 from django.template.defaultfilters import filesizeformat
 from django.utils.html import format_html
 from .fields import CustomFileField
@@ -237,6 +238,13 @@ class Project(models.Model):
                 expressions=[("session", RangeOperators.OVERLAPS)],
             ),
         ]
+
+    def validate_unique(self, exclude=None):
+        if self.session:
+            projects = Project.objects.filter(session__overlap=self.session)
+            if projects.exclude(id=self.id).exists():
+                raise ValidationError("That session is already booked")
+        return super().validate_unique()
 
     def get_absolute_url(self):
         return f"/api/projects/{self.pk}/"
