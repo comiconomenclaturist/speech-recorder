@@ -113,7 +113,11 @@ class CreateProjectView(generics.CreateAPIView):
         if speaker and project.session:
             speaker.save()
             project.speaker = speaker
-            project.script = Script.objects.filter(project__isnull=True).first()
+            project.script = (
+                Script.objects.filter(project__isnull=True)
+                .exclude(recprompts__recording__gt="")
+                .first()
+            )
             project.save()
 
         return Response({}, status=200)
