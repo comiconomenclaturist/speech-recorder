@@ -239,6 +239,7 @@ class ProjectAdmin(admin.ModelAdmin):
     list_filter = (
         UpcomingFilter,
         "private",
+        ("release_form", admin.EmptyFieldListFilter),
         (
             "session",
             DateTimeTZRangeFilterBuilder(
