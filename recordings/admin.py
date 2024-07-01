@@ -18,25 +18,27 @@ import csv
 import io
 
 
-class ArchiveMixin:
-    def _check_project(self, obj, default):
+class CheckRecordingsMixin:
+    def _check_recordings(self, obj, default):
+        q = Q(recording__gt="")
+
         if obj:
             if obj.__class__ == RecPrompt and obj.recording:
                 return False
-            try:
-                if obj.project.script.recprompts.filter(recording__gt="").exists():
+            elif obj.__class__ == Project and obj.script.recprompts.filter(q).exists():
+                return False
+            elif obj.__class__ in (Speaker, Script):
+                if obj.project.script.recprompts.filter(q).exists():
                     return False
-            except:
-                pass
         return default
 
     def has_change_permission(self, request, obj=None):
         default = super().has_change_permission(request, obj)
-        return self._check_project(obj, default)
+        return self._check_recordings(obj, default)
 
     def has_delete_permission(self, request, obj=None):
         default = super().has_delete_permission(request, obj)
-        return self._check_project(obj, default)
+        return self._check_recordings(obj, default)
 
 
 class RecordingMixin:
@@ -52,7 +54,7 @@ class RecordingMixin:
 
 
 @admin.register(RecPrompt)
-class RecPromptAdmin(ArchiveMixin, RecordingMixin, admin.ModelAdmin):
+class RecPromptAdmin(CheckRecordingsMixin, RecordingMixin, admin.ModelAdmin):
     model = RecPrompt
     list_display = ("__str__", "script", "project")
     list_filter = (ProjectFilter, RecordedFilter)
@@ -76,7 +78,7 @@ class RecPromptInline(RecordingMixin, admin.TabularInline):
 
 
 @admin.register(Script)
-class ScriptAdmin(ArchiveMixin, admin.ModelAdmin):
+class ScriptAdmin(CheckRecordingsMixin, admin.ModelAdmin):
     def recorded(self, obj=None):
         if obj and obj.recprompts.filter(recording__gt=""):
             return True
@@ -120,7 +122,7 @@ def current_month():
 
 
 @admin.register(Project)
-class ProjectAdmin(admin.ModelAdmin):
+class ProjectAdmin(CheckRecordingsMixin, admin.ModelAdmin):
     model = Project
     form = ProjectAdminForm
     change_list_template = "admin/recordings/project/change_list.html"
@@ -265,7 +267,7 @@ class ProjectAdmin(admin.ModelAdmin):
 
 
 @admin.register(Speaker)
-class SpeakerAdmin(ArchiveMixin, admin.ModelAdmin):
+class SpeakerAdmin(CheckRecordingsMixin, admin.ModelAdmin):
     def booking(self, obj):
         if obj:
             return obj.project.session.lower
