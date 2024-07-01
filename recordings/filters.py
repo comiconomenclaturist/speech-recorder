@@ -93,7 +93,7 @@ class RecordedFilter(admin.SimpleListFilter):
 
 
 class SpeakerRecordedFilter(admin.SimpleListFilter):
-    title = _("Recorded")
+    title = _("recorded")
     parameter_name = "recorded"
 
     def lookups(self, request, model_admin):
@@ -111,6 +111,14 @@ class SpeakerRecordedFilter(admin.SimpleListFilter):
             return queryset.exclude(
                 project__script__recprompts__recording__gt=""
             ).distinct()
+
+
+class ProjectRecordedFilter(SpeakerRecordedFilter):
+    def queryset(self, request, queryset):
+        if self.value() == "true":
+            return queryset.filter(script__recprompts__recording__gt="").distinct()
+        if self.value() == "false":
+            return queryset.exclude(script__recprompts__recording__gt="").distinct()
 
 
 class StatusFilter(admin.SimpleListFilter):
