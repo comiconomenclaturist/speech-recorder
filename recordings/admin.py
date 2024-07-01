@@ -25,8 +25,9 @@ class CheckRecordingsMixin:
         if obj:
             if obj.__class__ == RecPrompt and obj.recording:
                 return False
-            elif obj.__class__ == Project and obj.script.recprompts.filter(q).exists():
-                return False
+            elif obj.__class__ == Project and obj.script:
+                if obj.script.recprompts.filter(q).exists():
+                    return False
             elif obj.__class__ in (Speaker, Script):
                 if obj.project.script.recprompts.filter(q).exists():
                     return False
