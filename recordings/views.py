@@ -153,13 +153,13 @@ class CalendlyWebhookView(generics.CreateAPIView):
                 project.save()
 
             elif event == "invitee.canceled":
-                if not project.script.recprompts.filter(recording__isnull=False):
+                if not project.script.recprompts.filter(recording__gt=""):
                     project.delete()
                     project.speaker.delete()
 
             elif event == "invitee_no_show.created":
                 if project.script:
-                    if not project.script.recprompts.filter(recording__isnull=False):
+                    if not project.script.recprompts.filter(recording__gt=""):
                         project.no_show = True
                         project.script = None
                     else:
