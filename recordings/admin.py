@@ -18,7 +18,7 @@ import csv
 import io
 
 
-class CheckRecordingsMixin:
+class ProjectPermissionMixin:
     def _check_recordings(self, obj, default):
         q = Q(recording__gt="")
 
@@ -33,12 +33,14 @@ class CheckRecordingsMixin:
                     return False
         return default
 
-    def has_change_permission(self, request, obj=None):
-        default = super().has_change_permission(request, obj)
-        return self._check_recordings(obj, default)
-
     def has_delete_permission(self, request, obj=None):
         default = super().has_delete_permission(request, obj)
+        return self._check_recordings(obj, default)
+
+
+class OtherPermissionMixin(ProjectPermissionMixin):
+    def has_change_permission(self, request, obj=None):
+        default = super().has_change_permission(request, obj)
         return self._check_recordings(obj, default)
 
 
@@ -55,7 +57,7 @@ class RecordingMixin:
 
 
 @admin.register(RecPrompt)
-class RecPromptAdmin(CheckRecordingsMixin, RecordingMixin, admin.ModelAdmin):
+class RecPromptAdmin(OtherPermissionMixin, RecordingMixin, admin.ModelAdmin):
     model = RecPrompt
     list_display = ("__str__", "script", "project")
     list_filter = (ProjectFilter, RecordedFilter)
@@ -79,7 +81,7 @@ class RecPromptInline(RecordingMixin, admin.TabularInline):
 
 
 @admin.register(Script)
-class ScriptAdmin(CheckRecordingsMixin, admin.ModelAdmin):
+class ScriptAdmin(OtherPermissionMixin, admin.ModelAdmin):
     def recorded(self, obj=None):
         if obj and obj.recprompts.filter(recording__gt=""):
             return True
@@ -123,7 +125,7 @@ def current_month():
 
 
 @admin.register(Project)
-class ProjectAdmin(CheckRecordingsMixin, admin.ModelAdmin):
+class ProjectAdmin(ProjectPermissionMixin, admin.ModelAdmin):
     model = Project
     form = ProjectAdminForm
     change_list_template = "admin/recordings/project/change_list.html"
@@ -268,7 +270,7 @@ class ProjectAdmin(CheckRecordingsMixin, admin.ModelAdmin):
 
 
 @admin.register(Speaker)
-class SpeakerAdmin(CheckRecordingsMixin, admin.ModelAdmin):
+class SpeakerAdmin(OtherPermissionMixin, admin.ModelAdmin):
     def booking(self, obj):
         if obj:
             return obj.project.session.lower
