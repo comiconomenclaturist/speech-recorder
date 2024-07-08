@@ -28,7 +28,7 @@ class ProjectPermissionMixin:
             elif obj.__class__ == Project and obj.script:
                 if obj.script.recprompts.filter(q).exists():
                     return False
-            elif obj.__class__ in (Speaker, Script):
+            elif obj.__class__ in (Speaker, Script) and hasattr(obj, "project"):
                 if obj.project.script.recprompts.filter(q).exists():
                     return False
         return default
