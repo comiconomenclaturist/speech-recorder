@@ -64,26 +64,29 @@ class CreateProjectView(generics.CreateAPIView):
 
         if data.get("event") == "invitee.created":
             PRIVATE_ID = settings.env("CALENDLY_PRIVATE_BOOKING_ID")
+            PUBLIC_ID = settings.env("CALENDLY_PUBLIC_BOOKING_ID")
             payload = data["payload"]
             event = payload["scheduled_event"]
 
             if not payload["rescheduled"]:
+                for answer in payload["questions_and_answers"]:
+                    if answer["question"] == "Gender":
+                        speaker.sex = answer["answer"][0]
+                    elif answer["question"] == "Date of Birth (DD/MM/YYYY)":
+                        speaker.dateOfBirth = parse(answer["answer"], dayfirst=True)
+                    elif answer["question"] == "Accent":
+                        speaker.accent = answer["answer"]
+
+                speaker.name = " ".join(payload["name"].split())
+                speaker.email = payload["email"]
+
+                project.session = DateTimeTZRange(
+                    event["start_time"], event["end_time"]
+                )
                 if event["event_type"].endswith(PRIVATE_ID):
-                    for answer in payload["questions_and_answers"]:
-                        if answer["question"] == "Gender":
-                            speaker.sex = answer["answer"][0]
-                        elif answer["question"] == "Date of Birth (DD/MM/YYYY)":
-                            speaker.dateOfBirth = parse(answer["answer"], dayfirst=True)
-                        elif answer["question"] == "Accent":
-                            speaker.accent = answer["answer"]
-
-                    speaker.name = " ".join(payload["name"].split())
-                    speaker.email = payload["email"]
-
-                    project.session = DateTimeTZRange(
-                        event["start_time"], event["end_time"]
-                    )
                     project.private = True
+                elif event["event_type"].endswith(PUBLIC_ID):
+                    project.private = False
 
         elif data.get("event_type") == "form_response":
 
