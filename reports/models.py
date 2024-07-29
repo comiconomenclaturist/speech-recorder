@@ -22,6 +22,9 @@ class Archive(models.Model):
 
     objects = FileModelQuerySet.as_manager()
 
+    class Meta:
+        ordering = ("-file",)
+
     def __str__(self):
         if self.file:
             return os.path.basename(self.file.name)
