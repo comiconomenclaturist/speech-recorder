@@ -1,6 +1,6 @@
 from django import forms
 from .models import Project
-from django.contrib.admin.widgets import AdminDateWidget
+from django.contrib.admin.widgets import AdminDateWidget, AdminSplitDateTime
 from django.contrib.postgres.forms.ranges import RangeWidget
 
 
@@ -31,8 +31,8 @@ class ProjectAdminForm(forms.ModelForm):
 
 
 class ArchiveForm(forms.Form):
-    start = forms.DateField(widget=AdminDateWidget)
-    end = forms.DateField(widget=AdminDateWidget)
+    start = forms.SplitDateTimeField(widget=AdminSplitDateTime)
+    end = forms.SplitDateTimeField(widget=AdminSplitDateTime)
 
     def clean(self):
         cleaned_data = super().clean()
