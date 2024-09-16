@@ -171,6 +171,7 @@ class ProjectAdmin(ProjectPermissionMixin, admin.ModelAdmin):
             if form.is_valid():
                 start = form.cleaned_data.get("start")
                 end = form.cleaned_data.get("end")
+                language = form.cleaned_data.get("language")
 
                 i = current_app.control.inspect()
 
@@ -188,7 +189,7 @@ class ProjectAdmin(ProjectPermissionMixin, admin.ModelAdmin):
                                 context=context,
                             )
 
-                current_app.send_task("Create archive", (start, end))
+                current_app.send_task("Create archive", (start, end, language))
                 self.message_user(
                     request, f"Creating an archive of projects from {start} to {end}..."
                 )

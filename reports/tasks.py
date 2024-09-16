@@ -13,10 +13,11 @@ def write_line(file, text):
 
 
 @shared_task(name="Create archive")
-def create_archive(start, end):
+def create_archive(start, end, language):
     projects = Project.objects.filter(
         session__contained_by=DateTimeTZRange(start, end),
         script__recprompts__recording__gt="",
+        script__language=language,
         archive__isnull=True,
     ).distinct()
 
@@ -24,7 +25,7 @@ def create_archive(start, end):
         first = projects.first().session.lower
         last = projects.last().session.upper
 
-        archive_name = f"ARCHIVE/{first.year}/Resonance Speech Database {first.date()} - {last.date()}.zip"
+        archive_name = f"ARCHIVE/{first.year}/Resonance Speech Database [{language.upper()}] {first.date()} - {last.date()}.zip"
 
         if not default_storage.exists(archive_name):
             with tempfile.NamedTemporaryFile(suffix=".zip") as tmp:

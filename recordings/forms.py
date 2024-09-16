@@ -2,6 +2,7 @@ from django import forms
 from .models import Project
 from django.contrib.admin.widgets import AdminDateWidget, AdminSplitDateTime
 from django.contrib.postgres.forms.ranges import RangeWidget
+from .models import Script
 
 
 class ProjectAdminForm(forms.ModelForm):
@@ -33,6 +34,9 @@ class ProjectAdminForm(forms.ModelForm):
 class ArchiveForm(forms.Form):
     start = forms.SplitDateTimeField(widget=AdminSplitDateTime)
     end = forms.SplitDateTimeField(widget=AdminSplitDateTime)
+    language = forms.ChoiceField(
+        choices=Script.LANGUAGE_CHOICES, initial=("en", "English")
+    )
 
     def clean(self):
         cleaned_data = super().clean()
