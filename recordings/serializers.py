@@ -94,7 +94,7 @@ class RecPromptSerializer(serializers.ModelSerializer):
         return {
             "mediaitem": {
                 "mediaitem": instance.mediaitem,
-                "attrs": {"languageISO639code": "en"},
+                "attrs": {"languageISO639code": instance.script.language},
             }
         }
 
@@ -153,4 +153,4 @@ class ScriptSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Script
-        exclude = ("id",)
+        exclude = ("id", "language")

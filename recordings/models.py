@@ -7,6 +7,8 @@ from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
 from django.template.defaultfilters import filesizeformat
 from django.utils.html import format_html
+from django.utils.translation import trans_real
+from django.utils.timezone import localtime
 from .fields import CustomFileField
 import uuid
 import os
@@ -260,11 +262,15 @@ class Project(models.Model):
 
     def __str__(self):
         if self.session and self.speaker:
-            return f"{self.session.lower.strftime('%Y-%m-%d %H:%M')} - {self.speaker}"
+            dt = localtime(self.session.lower)
+            return f"{dt.strftime('%Y-%m-%d %H:%M')} - {self.speaker}"
         return super().__str__()
 
 
 class Script(models.Model):
+    LANGUAGE_CHOICES = trans_real.get_languages().items()
+    language = models.CharField(max_length=7, choices=LANGUAGE_CHOICES, default="en")
+
     class Meta:
         ordering = ("id",)
 
