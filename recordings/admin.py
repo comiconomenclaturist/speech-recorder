@@ -29,8 +29,9 @@ class ProjectPermissionMixin:
                 if obj.script.recprompts.filter(q).exists():
                     return False
             elif obj.__class__ in (Speaker, Script) and hasattr(obj, "project"):
-                if obj.project.script.recprompts.filter(q).exists():
-                    return False
+                if obj.project.script:
+                    if obj.project.script.recprompts.filter(q).exists():
+                        return False
         return default
 
     def has_delete_permission(self, request, obj=None):
