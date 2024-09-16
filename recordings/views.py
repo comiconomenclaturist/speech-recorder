@@ -8,7 +8,9 @@ from django.utils.timezone import now
 from django.db import transaction
 from dateutil.parser import parse
 from psycopg2.extras import DateTimeTZRange
+from urllib.parse import urlparse
 from calendly.client import Calendly
+from calendly.models import CalendlyForm
 from speech_recording import settings
 from .models import *
 from .serializers import *
@@ -63,30 +65,32 @@ class CreateProjectView(generics.CreateAPIView):
         speaker = Speaker()
 
         if data.get("event") == "invitee.created":
-            PRIVATE_ID = settings.env("CALENDLY_PRIVATE_BOOKING_ID")
-            PUBLIC_ID = settings.env("CALENDLY_PUBLIC_BOOKING_ID")
             payload = data["payload"]
             event = payload["scheduled_event"]
 
-            if not payload["rescheduled"]:
-                for answer in payload["questions_and_answers"]:
-                    if answer["question"] == "Gender":
-                        speaker.sex = answer["answer"][0]
-                    elif answer["question"] == "Date of Birth (DD/MM/YYYY)":
-                        speaker.dateOfBirth = parse(answer["answer"], dayfirst=True)
-                    elif answer["question"] == "Accent":
-                        speaker.accent = answer["answer"]
+            path = urlparse(event["event_type"]).path
+            pk = path.split("/")[-1]
+            calendly_form = CalendlyForm.objects.filter(pk=pk)
 
-                speaker.name = " ".join(payload["name"].split())
-                speaker.email = payload["email"]
+            if calendly_form:
+                calendly_form = calendly_form.get()
 
-                project.session = DateTimeTZRange(
-                    event["start_time"], event["end_time"]
-                )
-                if event["event_type"].endswith(PRIVATE_ID):
-                    project.private = True
-                elif event["event_type"].endswith(PUBLIC_ID):
-                    project.private = False
+                if not payload["rescheduled"]:
+                    for answer in payload["questions_and_answers"]:
+                        if answer["question"] == "Gender":
+                            speaker.sex = answer["answer"][0]
+                        elif answer["question"] == "Date of Birth (DD/MM/YYYY)":
+                            speaker.dateOfBirth = parse(answer["answer"], dayfirst=True)
+                        elif answer["question"] == "Accent":
+                            speaker.accent = answer["answer"]
+
+                    speaker.name = " ".join(payload["name"].split())
+                    speaker.email = payload["email"]
+
+                    project.session = DateTimeTZRange(
+                        event["start_time"], event["end_time"]
+                    )
+                    project.private = calendly_form.private
 
         elif data.get("event_type") == "form_response":
 
@@ -117,7 +121,9 @@ class CreateProjectView(generics.CreateAPIView):
             speaker.save()
             project.speaker = speaker
             project.script = (
-                Script.objects.filter(project__isnull=True)
+                Script.objects.filter(
+                    project__isnull=True, language=calendly_form.language
+                )
                 .exclude(recprompts__recording__gt="")
                 .first()
             )
