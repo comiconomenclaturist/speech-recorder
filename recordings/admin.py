@@ -93,7 +93,7 @@ class ScriptAdmin(OtherPermissionMixin, admin.ModelAdmin):
     inlines = (RecPromptInline,)
     list_display = ("__str__", "project", "recorded")
     search_fields = ("project__speaker__name", "project__speaker__email")
-    list_filter = (StatusFilter,)
+    list_filter = (StatusFilter, LanguageFilter)
 
     def get_search_results(self, request, queryset, search_term):
         queryset, may_have_duplicates = super().get_search_results(

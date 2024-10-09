@@ -145,3 +145,20 @@ class StatusFilter(admin.SimpleListFilter):
                     project__isnull=False, recprompts__recording__gt=""
                 ).distinct()
         return queryset
+
+
+class LanguageFilter(admin.SimpleListFilter):
+    title = _("Language")
+    parameter_name = "language"
+
+    def lookups(self, request, model_admin):
+        choices = model_admin.model.LANGUAGE_CHOICES
+        used = model_admin.model.objects.order_by("language").values_list(
+            "language", flat=True
+        )
+        return [lang for lang in choices if lang[0] in used]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(language=self.value())
+        return queryset
