@@ -5,6 +5,7 @@ from django.urls import path, include
 from django.shortcuts import HttpResponseRedirect, resolve_url
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.views import redirect_to_login
+from django.views.generic.base import RedirectView
 from django.urls.base import reverse
 from django.utils.http import is_safe_url
 from rest_framework.routers import SimpleRouter
@@ -53,6 +54,7 @@ class AdminSiteOTPRequiredMixinRedirSetup(AdminSiteOTPRequired):
 admin.site.__class__ = AdminSiteOTPRequiredMixinRedirSetup
 
 urlpatterns = [
+    path("", RedirectView.as_view(url="/admin/", permanent=True)),
     path("admin/", admin.site.urls),
     path("api/bookings/add/", CreateProjectView.as_view()),
     path("api/calendly/", CalendlyWebhookView.as_view()),
