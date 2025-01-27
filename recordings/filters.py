@@ -172,6 +172,7 @@ class AccentFilter(admin.SimpleListFilter):
     def lookups(self, request, model_admin):
         accents = (
             model_admin.model.objects.filter(accent__gt="")
+            .order_by("accent")
             .values_list("accent", flat=True)
             .distinct()
         )
