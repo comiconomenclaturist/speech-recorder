@@ -162,3 +162,18 @@ class LanguageFilter(admin.SimpleListFilter):
         if self.value():
             return queryset.filter(language=self.value())
         return queryset
+
+
+class AccentFilter(admin.SimpleListFilter):
+    title = _("Accent")
+    parameter_name = "accent"
+    template = "admin/recordings/filter.html"
+
+    def lookups(self, request, model_admin):
+        accents = model_admin.model.objects.values_list("accent", flat=True).distinct()
+        return [(accent, accent) for accent in accents]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(accent=self.value())
+        return queryset

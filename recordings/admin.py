@@ -304,6 +304,7 @@ class SpeakerAdmin(OtherPermissionMixin, admin.ModelAdmin):
     list_filter = (
         "sex",
         "project__no_show",
+        AccentFilter,
         SpeakerRecordedFilter,
         (
             "project__session",
