@@ -292,7 +292,15 @@ class SpeakerAdmin(OtherPermissionMixin, admin.ModelAdmin):
     recorded.boolean = True
 
     model = Speaker
-    list_display = ("__str__", "sex", "email", "booking", "no_show", "recorded")
+    list_display = (
+        "__str__",
+        "sex",
+        "email",
+        "accent",
+        "booking",
+        "no_show",
+        "recorded",
+    )
     list_filter = (
         "sex",
         "project__no_show",
