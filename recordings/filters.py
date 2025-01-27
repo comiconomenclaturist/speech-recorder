@@ -170,7 +170,11 @@ class AccentFilter(admin.SimpleListFilter):
     template = "admin/recordings/filter.html"
 
     def lookups(self, request, model_admin):
-        accents = model_admin.model.objects.values_list("accent", flat=True).distinct()
+        accents = (
+            model_admin.model.objects.filter(accent__gt="")
+            .values_list("accent", flat=True)
+            .distinct()
+        )
         return [(accent, accent) for accent in accents]
 
     def queryset(self, request, queryset):
