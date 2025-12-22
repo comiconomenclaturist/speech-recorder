@@ -30,10 +30,19 @@ class ProjectSerializer(serializers.ModelSerializer):
     Speakers = serializers.SerializerMethodField()
 
     def get_recordingMixerName(self, instance):
-        return {
-            "recordingMixerName": instance.recordingMixerName.name,
-            "attrs": {"providerId": instance.recordingMixerName.providerId},
-        }
+        if instance.recordingMixerName.interfaceName:
+            return {
+                "recordingMixerName": instance.recordingMixerName.name,
+                "attrs": {
+                    "interfaceName": instance.recordingMixerName.interfaceName,
+                    "providerId": instance.recordingMixerName.providerId,
+                },
+            }
+        else:
+            return {
+                "recordingMixerName": instance.recordingMixerName.name,
+                "attrs": {"providerId": instance.recordingMixerName.providerId},
+            }
 
     def get_playbackMixerName(self, instance):
         return {

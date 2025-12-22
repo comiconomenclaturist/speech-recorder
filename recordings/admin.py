@@ -360,7 +360,15 @@ class PlaybackMixerNameAdmin(MixerNameAdmin):
     pass
 
 
-admin.site.register(RecordingConfig)
-admin.site.register(Format)
+@admin.register(Format)
+class FormatAdmin(admin.ModelAdmin):
+    list_display = ("sampleRate", "sampleSizeInBits", "channels")
+
+
+@admin.register(RecordingConfig)
+class RecordingConfigAdmin(admin.ModelAdmin):
+    list_display = ("url", "captureScope", "Format", "default")
+
+
 admin.site.register(Microphone)
 admin.site.register(Soundcard)
