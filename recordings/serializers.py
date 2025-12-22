@@ -7,7 +7,6 @@ class FormatSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Format
-        exclude = ("id",)
         fields = (
             "channels",
             "frameSize",
