@@ -65,7 +65,9 @@ class Format(models.Model):
     sampleSizeInBits = models.PositiveSmallIntegerField(default=24)
 
     def __str__(self):
-        return f"{self.sampleRate} Hz / {self.sampleSizeInBits} bit"
+        return (
+            f"{self.sampleRate} Hz / {self.sampleSizeInBits} bit / {self.channels} ch"
+        )
 
 
 class GetDefaultMixin:
@@ -119,7 +121,7 @@ class MixerName(models.Model, GetDefaultMixin):
 
 
 class RecordingMixerName(MixerName):
-    pass
+    interfaceName = models.CharField(max_length=128, null=True, blank=True)
 
 
 class PlaybackMixerName(MixerName):
