@@ -8,6 +8,13 @@ class FormatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Format
         exclude = ("id",)
+        fields = (
+            "channels",
+            "frameSize",
+            "sampleRate",
+            "bigEndian",
+            "sampleSizeInBits",
+        )
 
 
 class RecordingConfigSerializer(serializers.ModelSerializer):
@@ -19,7 +26,7 @@ class RecordingConfigSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RecordingConfig
-        exclude = ("id", "default")
+        fields = ("url", "Format", "captureScope")
 
 
 class ProjectSerializer(serializers.ModelSerializer):
