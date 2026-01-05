@@ -19,13 +19,18 @@ class FormatSerializer(serializers.ModelSerializer):
 class RecordingConfigSerializer(serializers.ModelSerializer):
     Format = FormatSerializer()
     captureScope = serializers.SerializerMethodField()
+    mode = serializers.SerializerMethodField()
+    progressToNextUnrecorded = serializers.BooleanField()
 
     def get_captureScope(self, instance):
         return instance.get_captureScope_display()
 
+    def get_mode(self, instance):
+        return instance.get_mode_display()
+
     class Meta:
         model = RecordingConfig
-        fields = ("url", "Format", "captureScope")
+        fields = ("url", "Format", "captureScope", "mode", "progressToNextUnrecorded")
 
 
 class ProjectSerializer(serializers.ModelSerializer):
