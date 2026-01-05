@@ -80,12 +80,15 @@ class GetDefaultMixin:
 
 class RecordingConfig(models.Model, GetDefaultMixin):
     CAPTURE_SCOPE_CHOICES = (("S", "SESSION"), ("I", "ITEM"))
+    MODE_CHOICES = (("m", "manual"), ("p", "autoprogress"), ("r", "autorecording"))
 
     url = models.CharField(max_length=64, default="RECS/")
     Format = models.ForeignKey(Format, on_delete=models.PROTECT, verbose_name="Format")
     captureScope = models.CharField(
         max_length=1, choices=CAPTURE_SCOPE_CHOICES, default="S"
     )
+    mode = models.CharField(max_length=1, default="r", choices=MODE_CHOICES)
+    progressToNextUnrecorded = models.BooleanField(default=True)
     default = models.BooleanField(default=False)
 
     class Meta:
