@@ -50,7 +50,7 @@ def create_archive(start, end, language):
                                 write_line(file, f"\t{prompt.mediaitem}\n")
 
                         for prompt in recprompts:
-                            filename = f"0_{project.speaker.pk}_0_{prompt.pk}.wav"
+                            filename = prompt.construct_filename()
                             filepath = os.path.join(speaker, filename)
                             zf.writestr(filepath, prompt.recording.file.open().read())
                     description = Description.objects.first()

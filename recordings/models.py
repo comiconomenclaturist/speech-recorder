@@ -282,6 +282,9 @@ class Script(models.Model):
     def __str__(self):
         return f"script_{self.pk}"
 
+    def get_iso_string(self):
+        return f"{self.get_language_display().upper()}_2_{self.language}"
+
 
 class RecPrompt(models.Model):
     script = models.ForeignKey(
@@ -337,3 +340,7 @@ class RecPrompt(models.Model):
 
     def __str__(self):
         return self.mediaitem
+
+    def construct_filename(self):
+        speaker = self.script.project.speaker
+        return f"LMC_{self.script.get_iso_string()}_{speaker.pk}_{speaker.sex}_0_0_{self.pk}.wav"
