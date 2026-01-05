@@ -367,7 +367,19 @@ class FormatAdmin(admin.ModelAdmin):
 
 @admin.register(RecordingConfig)
 class RecordingConfigAdmin(admin.ModelAdmin):
-    list_display = ("url", "captureScope", "Format", "default")
+    list_display = (
+        "url",
+        "captureScope",
+        "Format",
+        "mode",
+        "progressToNextUnrecorded",
+        "default",
+    )
+    list_editable = (
+        "mode",
+        "progressToNextUnrecorded",
+        "default",
+    )
 
 
 admin.site.register(Microphone)
