@@ -362,6 +362,7 @@ class PlaybackMixerNameAdmin(MixerNameAdmin):
 
 class ChannelInline(admin.TabularInline):
     model = Channel
+    min_num = 1
     extra = 1
 
 
