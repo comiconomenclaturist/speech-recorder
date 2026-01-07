@@ -367,8 +367,11 @@ class ChannelInline(admin.TabularInline):
 
 @admin.register(Format)
 class FormatAdmin(admin.ModelAdmin):
-    list_display = ("sampleRate", "sampleSizeInBits", "channels")
+    list_display = ("sampleRate", "sampleSizeInBits", "number_of_channels")
     inlines = (ChannelInline,)
+
+    def number_of_channels(self, obj):
+        return obj.channels.count()
 
 
 @admin.register(RecordingConfig)
