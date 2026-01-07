@@ -64,9 +64,7 @@ class Format(models.Model):
     sampleSizeInBits = models.PositiveSmallIntegerField(default=24)
 
     def __str__(self):
-        return (
-            f"{self.sampleRate} Hz / {self.sampleSizeInBits} bit / {self.channels} ch"
-        )
+        return f"{self.sampleRate} Hz / {self.sampleSizeInBits} bit / {self.channels.count()} ch"
 
 
 class Channel(models.Model):
