@@ -3,7 +3,11 @@ from .models import *
 
 
 class FormatSerializer(serializers.ModelSerializer):
+    channels = serializers.SerializerMethodField()
     sampleRate = serializers.FloatField()
+
+    def get_channels(self, instance):
+        return instance.channels.count()
 
     class Meta:
         model = Format

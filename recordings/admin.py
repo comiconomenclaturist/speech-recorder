@@ -360,9 +360,15 @@ class PlaybackMixerNameAdmin(MixerNameAdmin):
     pass
 
 
+class ChannelInline(admin.TabularInline):
+    model = Channel
+    extra = 1
+
+
 @admin.register(Format)
 class FormatAdmin(admin.ModelAdmin):
     list_display = ("sampleRate", "sampleSizeInBits", "channels")
+    inlines = (ChannelInline,)
 
 
 @admin.register(RecordingConfig)

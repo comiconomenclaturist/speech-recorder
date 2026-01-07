@@ -58,7 +58,6 @@ class Speaker(models.Model):
 
 
 class Format(models.Model):
-    channels = models.PositiveSmallIntegerField(default=1)
     frameSize = models.PositiveSmallIntegerField(default=3)
     sampleRate = models.PositiveIntegerField(default=48000)
     bigEndian = models.BooleanField(default=True)
@@ -68,6 +67,22 @@ class Format(models.Model):
         return (
             f"{self.sampleRate} Hz / {self.sampleSizeInBits} bit / {self.channels} ch"
         )
+
+
+class Channel(models.Model):
+    Format = models.ForeignKey(
+        Format, related_name="channels", on_delete=models.PROTECT
+    )
+    index = models.PositiveSmallIntegerField(
+        default=0, help_text="Channel index starting from 0"
+    )
+    microphone = models.ForeignKey("recordings.Microphone", on_delete=models.PROTECT)
+
+    class Meta:
+        unique_together = ("Format", "index")
+
+    def __str__(self):
+        return f"{self.index}. {self.microphone.model}"
 
 
 class GetDefaultMixin:
@@ -157,7 +172,7 @@ class Equipment(models.Model, GetDefaultMixin):
     def delete(self, *args, **kwargs):
         if self.manual:
             self.manual.delete()
-        super(Microphone, self).delete(*args, **kwargs)
+        super().delete(*args, **kwargs)
 
     def __str__(self):
         return self.model
