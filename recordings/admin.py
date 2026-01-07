@@ -374,6 +374,18 @@ class FormatAdmin(admin.ModelAdmin):
     def number_of_channels(self, obj):
         return obj.channels.count()
 
+    def has_change_permission(self, request, obj=None):
+        recorded = Project.objects.filter(script__recprompts__recording__gt="")
+        if obj and obj.recordingconfig_set.filter(project__in=recorded).exists():
+            return False
+        return super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        recorded = Project.objects.filter(script__recprompts__recording__gt="")
+        if obj and obj.recordingconfig_set.filter(project__in=recorded).exists():
+            return False
+        return super().has_change_permission(request, obj)
+
 
 @admin.register(RecordingConfig)
 class RecordingConfigAdmin(admin.ModelAdmin):
@@ -390,6 +402,18 @@ class RecordingConfigAdmin(admin.ModelAdmin):
         "progressToNextUnrecorded",
         "default",
     )
+
+    def has_change_permission(self, request, obj=None):
+        recorded = Script.objects.filter(recprompts__recording__gt="")
+        if obj and obj.project_set.filter(script__in=recorded).exists():
+            return False
+        return super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        recorded = Script.objects.filter(recprompts__recording__gt="")
+        if obj and obj.project_set.filter(script__in=recorded).exists():
+            return False
+        return super().has_change_permission(request, obj)
 
 
 admin.site.register(Microphone)
