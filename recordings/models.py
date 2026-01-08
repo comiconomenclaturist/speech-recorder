@@ -303,12 +303,25 @@ class Script(models.Model):
 
 
 class RecPrompt(models.Model):
+    class InstructionChoices(models.TextChoices):
+        FAST = "0", "fast"
+        REGULAR = "1", "regular"
+        HIGH_PITCH = "2", "high-pitch"
+        LOW_PITCH = "3", "low-pitch"
+        SLOW = "4", "slow"
+        HAPPY = "5", "happy"
+        SAD = "6", "sad"
+        WHISPER = "7", "whisper"
+
     script = models.ForeignKey(
         Script,
         null=True,
         blank=True,
         related_name="recprompts",
         on_delete=models.PROTECT,
+    )
+    recinstructions = models.CharField(
+        max_length=1, default="", blank=True, choices=InstructionChoices.choices
     )
     mediaitem = models.CharField(unique=True, max_length=255)
     finalsilence = models.PositiveIntegerField(
@@ -360,3 +373,6 @@ class RecPrompt(models.Model):
     def construct_filename(self):
         speaker = self.script.project.speaker
         return f"LMC_{self.script.get_iso_string()}_{speaker.pk}_{speaker.sex}_0_0_{self.pk}.wav"
+
+    class Meta:
+        ordering = ("id",)

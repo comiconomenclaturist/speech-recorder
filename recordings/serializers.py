@@ -109,6 +109,7 @@ class SpeakerSerializer(serializers.ModelSerializer):
 
 class RecPromptSerializer(serializers.ModelSerializer):
     recprompt = serializers.SerializerMethodField()
+    recinstructions = serializers.CharField(source="get_recinstructions_display")
 
     class Meta:
         model = RecPrompt
@@ -147,15 +148,18 @@ class ScriptSerializer(serializers.ModelSerializer):
         recordings = []
 
         for recording in data:
-            recordings.append(
-                {
-                    "recprompt": recording["recprompt"],
-                    "attrs": {
-                        "finalsilence": str(recording["finalsilence"]),
-                        "itemcode": f"{recording['id']:010}",
-                    },
-                }
-            )
+            recprompt = {
+                "recprompt": recording["recprompt"],
+                "attrs": {
+                    "finalsilence": str(recording["finalsilence"]),
+                    "itemcode": f"{recording['id']:010}",
+                },
+            }
+            if recording["recinstructions"]:
+                recprompt = {
+                    "recinstructions": recording["recinstructions"]
+                } | recprompt
+            recordings.append(recprompt)
         return recordings
 
     def get_script(self, instance):
