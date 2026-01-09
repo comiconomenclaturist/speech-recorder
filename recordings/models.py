@@ -305,7 +305,7 @@ class Script(models.Model):
 class RecPrompt(models.Model):
     class InstructionChoices(models.TextChoices):
         FAST = "0", "fast"
-        REGULAR = "1", "regular"
+        ANGRY = "1", "angry"
         HIGH_PITCH = "2", "high-pitch"
         LOW_PITCH = "3", "low-pitch"
         SLOW = "4", "slow"
