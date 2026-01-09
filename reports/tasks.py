@@ -47,7 +47,10 @@ def create_archive(start, end, language):
                         with zf.open(script, "w") as file:
                             for prompt in recprompts:
                                 write_line(file, f"0_{project.speaker.pk}_{prompt.pk}")
-                                write_line(file, f"\t{prompt.mediaitem}\n")
+                                write_line(file, f"\t{prompt.mediaitem}")
+                                write_line(
+                                    file, f"\t{prompt.get_recinstructions_display()}\n"
+                                )
 
                         for prompt in recprompts:
                             filename = prompt.construct_filename()
