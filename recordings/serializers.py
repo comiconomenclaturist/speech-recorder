@@ -157,8 +157,9 @@ class ScriptSerializer(serializers.ModelSerializer):
             }
             if recording["recinstructions"]:
                 recprompt = {
-                    "recinstructions": recording["recinstructions"]
-                } | recprompt
+                    **{"recinstructions": recording["recinstructions"]},
+                    **recprompt,
+                }
             recordings.append(recprompt)
         return recordings
 
