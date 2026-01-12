@@ -399,6 +399,8 @@ class RecordingConfigAdmin(admin.ModelAdmin):
     )
     list_editable = (
         "mode",
+        "preRecDelay",
+        "postRecDelay",
         "progressToNextUnrecorded",
         "default",
     )
