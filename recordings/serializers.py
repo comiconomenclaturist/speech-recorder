@@ -34,7 +34,15 @@ class RecordingConfigSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RecordingConfig
-        fields = ("url", "Format", "captureScope", "mode", "progressToNextUnrecorded")
+        fields = (
+            "url",
+            "Format",
+            "captureScope",
+            "mode",
+            "preRecDelay",
+            "postRecDelay",
+            "progressToNextUnrecorded",
+        )
 
 
 class ProjectSerializer(serializers.ModelSerializer):

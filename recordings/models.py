@@ -101,6 +101,12 @@ class RecordingConfig(models.Model, GetDefaultMixin):
         max_length=1, choices=CAPTURE_SCOPE_CHOICES, default="S"
     )
     mode = models.CharField(max_length=1, default="r", choices=MODE_CHOICES)
+    preRecDelay = models.PositiveIntegerField(
+        default=1000, help_text="Duration in milliseconds"
+    )
+    postRecDelay = models.PositiveIntegerField(
+        default=500, help_text="Duration in milliseconds"
+    )
     progressToNextUnrecorded = models.BooleanField(default=True)
     default = models.BooleanField(default=False)
 
