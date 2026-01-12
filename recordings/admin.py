@@ -394,6 +394,8 @@ class RecordingConfigAdmin(admin.ModelAdmin):
         "captureScope",
         "Format",
         "mode",
+        "preRecDelay",
+        "postRecDelay",
         "progressToNextUnrecorded",
         "default",
     )
