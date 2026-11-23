@@ -372,7 +372,17 @@ class RecPrompt(models.Model):
     def delete(self, *args, **kwargs):
         if self.recording:
             self.recording.delete()
-        super(RecPrompt, self).delete(*args, **kwargs)
+        super().delete(*args, **kwargs)
+
+    def delete_recording(self):
+        if self.recording:
+            self.recording.delete(save=False)
+
+        self.recording = None
+        self.filesize = None
+        self.deleted = True
+
+        self.save(update_fields=["recording", "filesize", "deleted"])
 
     def __str__(self):
         return self.mediaitem
