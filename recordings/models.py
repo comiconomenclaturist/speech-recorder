@@ -340,6 +340,7 @@ class RecPrompt(models.Model):
         blank=True,
     )
     filesize = models.PositiveIntegerField(null=True, blank=True, editable=False)
+    deleted = models.BooleanField(default=False)
 
     objects = FileModelQuerySet.as_manager()
 
@@ -382,3 +383,9 @@ class RecPrompt(models.Model):
 
     class Meta:
         ordering = ("id",)
+        constraints = [
+            models.CheckConstraint(
+                check=~Q(recording__gt="", deleted=True),
+                name="file_deleted_consistency",
+            ),
+        ]
